@@ -6,9 +6,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.navigation.compose.NavHost
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +38,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,13 +79,17 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyDrawer(navController: NavController, mapViewModel: MapViewModel, content: @Composable () -> Unit) {
+fun MyDrawer(
+    navController: NavController,
+    mapViewModel: MapViewModel,
+    content: @Composable () -> Unit
+) {
     val scope = rememberCoroutineScope()
     val state: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     ModalNavigationDrawer(drawerState = state, gesturesEnabled = false, drawerContent = {
         ModalDrawerSheet {
-            Text(text = "Drawer title", modifier = Modifier.padding(16.dp))
+            Text(text = "Mega Menú del Mapita", modifier = Modifier.padding(16.dp))
             Divider()
             IconButton(
                 onClick = {
@@ -97,18 +104,24 @@ fun MyDrawer(navController: NavController, mapViewModel: MapViewModel, content: 
                     tint = Color.Black
                 )
             }
-            Button(onClick = {
-                navController.navigate(Routes.MapScreen.route)
-                scope.launch { state.close() }
-            }) {
-                Text(text = "Perú")
-            }
-
-            Button(onClick = {
-                navController.navigate(Routes.ListMarkersScreen.route)
-                scope.launch { state.close() }
-            }) {
-                Text(text = "Perú2")
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                screensFromDrawer.forEach { screen ->
+                    Button(
+                        modifier = Modifier.fillMaxWidth(0.9f),
+                        shape = RectangleShape,
+                        onClick = {
+                            navController.navigate(screen.route)
+                            scope.launch { state.close() }
+                        }
+                    ) {
+                        Text(text = screen.title)
+                    }
+                }
             }
         }
     }) {
@@ -116,18 +129,24 @@ fun MyDrawer(navController: NavController, mapViewModel: MapViewModel, content: 
     }
 }
 
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MyScaffold(mapViewModel: MapViewModel, state: DrawerState, navController: NavController, content: @Composable () -> Unit) {
+fun MyScaffold(
+    mapViewModel: MapViewModel,
+    state: DrawerState,
+    navController: NavController,
+    content: @Composable () -> Unit
+) {
     Scaffold(
         topBar = { MyTopAppBar(mapViewModel, state) },
-    ){
-        Column (
+    ) {
+        Column(
             Modifier
                 .fillMaxSize()
                 .background(Color.Magenta)
-        ){
-            Box(Modifier.padding(it)){
+        ) {
+            Box(Modifier.padding(it)) {
                 content() // Llamar al contenido pasado
             }
         }
