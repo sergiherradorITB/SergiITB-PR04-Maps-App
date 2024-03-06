@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.navigation.compose.NavHost
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
@@ -40,6 +42,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.sergiitb_pr04_maps_app.view.AddMarkerScreen
+import com.example.sergiitb_pr04_maps_app.view.ListMarkersScreen
 import com.example.sergiitb_pr04_maps_app.view.MapScreen
 import com.example.sergiitb_pr04_maps_app.view.MenuScreen
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
@@ -62,6 +66,9 @@ class MainActivity : ComponentActivity() {
                 composable(Routes.MapScreen.route) {
                     MapScreen(navigationController, mapViewModel)
                 }
+                composable(Routes.ListMarkersScreen.route) {
+                    ListMarkersScreen(navigationController, mapViewModel)
+                }
             }
         }
     }
@@ -69,32 +76,61 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyDrawer(navController: NavController, mapViewModel: MapViewModel) {
+fun MyDrawer(navController: NavController, mapViewModel: MapViewModel, content: @Composable () -> Unit) {
     val scope = rememberCoroutineScope()
     val state: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    ModalNavigationDrawer(drawerState = state, gesturesEnabled = true, drawerContent = {
+    ModalNavigationDrawer(drawerState = state, gesturesEnabled = false, drawerContent = {
         ModalDrawerSheet {
             Text(text = "Drawer title", modifier = Modifier.padding(16.dp))
             Divider()
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        state.close()
+                    }
+                }
+            ) {
+                Icon(
+                    Icons.Default.Close, // Usar el icono de cierre adecuado
+                    contentDescription = "Close",
+                    tint = Color.Black
+                )
+            }
             Button(onClick = {
                 navController.navigate(Routes.MapScreen.route)
                 scope.launch { state.close() }
             }) {
                 Text(text = "Perú")
             }
+
+            Button(onClick = {
+                navController.navigate(Routes.ListMarkersScreen.route)
+                scope.launch { state.close() }
+            }) {
+                Text(text = "Perú2")
+            }
         }
     }) {
-        MyScaffold(mapViewModel, state, navController)
+        MyScaffold(mapViewModel, state, navController, content)
     }
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyScaffold(mapViewModel: MapViewModel, state: DrawerState, navController: NavController) {
-    Scaffold(topBar = { MyTopAppBar(mapViewModel, state) }) {
-
+fun MyScaffold(mapViewModel: MapViewModel, state: DrawerState, navController: NavController, content: @Composable () -> Unit) {
+    Scaffold(
+        topBar = { MyTopAppBar(mapViewModel, state) },
+    ){
+        Column (
+            Modifier
+                .fillMaxSize()
+                .background(Color.Magenta)
+        ){
+            Box(Modifier.padding(it)){
+                content() // Llamar al contenido pasado
+            }
+        }
     }
 }
 
@@ -109,15 +145,28 @@ fun MyTopAppBar(mapViewModel: MapViewModel, state: DrawerState) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "SERGIBLI ©",
+                    text = "MAPITA ©",
                     modifier = Modifier.weight(1f),
-                    color = Color.White,
+                    color = Color.Black,
                     fontSize = 23.sp,
                     textAlign = TextAlign.Center
                 )
             }
         },
         navigationIcon = {
+            IconButton(onClick = {
+                scope.launch {
+                    state.open()
+                }
+            }) {
+                Icon(
+                    Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    tint = Color.Black
+                )
+            }
+        },
+        actions = {
             IconButton(
                 onClick = {
                     //navigationController.navigate(Routes.DetailScreen.route)
@@ -127,19 +176,6 @@ fun MyTopAppBar(mapViewModel: MapViewModel, state: DrawerState) {
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     //tint = if (listScreenViewModel.pillarGhibliId() != "") Color.White else Color.Black
-                )
-            }
-        },
-        actions = {
-            IconButton(onClick = {
-                scope.launch {
-                    state.open()
-                }
-            }) {
-                Icon(
-                    Icons.Default.Menu,
-                    contentDescription = "Search",
-                    tint = Color.Black
                 )
             }
         }
