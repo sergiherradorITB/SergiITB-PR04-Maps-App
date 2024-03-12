@@ -142,9 +142,7 @@ fun MyScaffold(
         topBar = { MyTopAppBar(mapViewModel, state) },
     ) {
         Column(
-            Modifier
-                .fillMaxSize()
-                .background(Color.Magenta)
+            Modifier.fillMaxSize(),
         ) {
             Box(Modifier.padding(it)) {
                 content() // Llamar al contenido pasado
