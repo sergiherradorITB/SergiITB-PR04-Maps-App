@@ -1,5 +1,6 @@
 package com.example.sergiitb_pr04_maps_app.view
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,8 +15,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,7 +44,7 @@ import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 
 @Composable
-fun ListMarkersScreen(navController:NavController ,mapViewModel: MapViewModel) {
+fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) {
     val lazyGridState = rememberLazyGridState()
     val marcadores: List<MarkerSergi> by mapViewModel.markers.observeAsState(emptyList())
 
@@ -49,7 +56,7 @@ fun ListMarkersScreen(navController:NavController ,mapViewModel: MapViewModel) {
         ) {
 
             items(marcadores) { marker ->
-                locationItem(marker, navController,mapViewModel)
+                locationItem(marker, navController, mapViewModel)
             }
         }
     }
@@ -63,26 +70,36 @@ fun locationItem(
     mapViewModel: MapViewModel
 ) {
     Card(
-        border = BorderStroke(2.dp, Color.LightGray),
+        border = BorderStroke(2.dp, marker.category.colorResId),
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp)
-            //.background(marker.category.colorResId)
     ) {
         Box {
             Image(
-                painter = painterResource(id = R.drawable.itb_transformed),
+                bitmap = marker.photo.asImageBitmap(),
                 contentDescription = "itb-defaultLogo",
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(0.4f) // Ajusta la transparencia de la imagen
-                    .background(marker.category.colorResId)
+                    //.background(marker.category.colorResId)
                     .clickable {
                         mapViewModel.changePosition(marker.position)
                         navController.navigate(Routes.MapScreen.route)
                     }
             )
-
+            IconButton(
+                onClick = {mapViewModel.removeMarker(marker)},
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp) // Añade un poco de espacio alrededor del botón
+            ) {
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = "Close",
+                    tint = Color.Black // Cambia el color de la X si lo necesitas
+                )
+            }
             Column(
                 modifier = Modifier
                     .padding(16.dp)
@@ -96,14 +113,6 @@ fun locationItem(
                     textAlign = TextAlign.Center // Alineación central
                 )
                 Text(text = marker.category.name)
-
-                // Botón para eliminar el marcador
-                Button(
-                    onClick = { mapViewModel.removeMarker(marker) },
-                    modifier = Modifier.align(Alignment.End) // Coloca el botón al final del Column
-                ) {
-                    Text("Eliminar")
-                }
             }
         }
     }

@@ -14,7 +14,6 @@ import androidx.lifecycle.ViewModel
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.google.android.gms.maps.model.LatLng
-import kotlin.math.exp
 
 class MapViewModel : ViewModel() {
     var expanded by mutableStateOf(false)
@@ -25,6 +24,16 @@ class MapViewModel : ViewModel() {
 
     fun pillarExpanded():Boolean{
         return expanded
+    }
+
+    var expandedMapa by mutableStateOf(false)
+        private set
+    fun modifyExpandedMapa(valorNuevo:Boolean){
+        expandedMapa = valorNuevo
+    }
+
+    fun pillarExpandedMapa():Boolean{
+        return expandedMapa
     }
 
     private var position = LatLng(41.4534265, 2.1837151)
@@ -86,5 +95,19 @@ class MapViewModel : ViewModel() {
         val currentList = _categories.value.orEmpty().toMutableList()
         currentList.remove(category)
         _categories.value = currentList
+    }
+
+    // LiveData para la categoría seleccionada
+    private val _selectedCategory = MutableLiveData<Categoria?>()
+    val selectedCategory: LiveData<Categoria?> = _selectedCategory
+
+    // Método para establecer la categoría seleccionada
+    fun setSelectedCategory(category: Categoria?) {
+        _selectedCategory.value = category
+    }
+
+    // Método para obtener marcadores por categoría
+    fun getMarkersByCategory(category: Categoria): List<MarkerSergi> {
+        return _markers.value?.filter { it.category == category } ?: emptyList()
     }
 }
