@@ -16,15 +16,27 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,30 +50,88 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.sergiitb_pr04_maps_app.MyDrawer
+import com.example.sergiitb_pr04_maps_app.MyDrawerWithFloatingButton
 import com.example.sergiitb_pr04_maps_app.R
 import com.example.sergiitb_pr04_maps_app.Routes
+import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) {
     val lazyGridState = rememberLazyGridState()
-    val marcadores: List<MarkerSergi> by mapViewModel.markers.observeAsState(emptyList())
+    val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
+    var texto by remember { mutableStateOf("Mostrar Todos") }
+    val marcadores by mapViewModel.markers.observeAsState(emptyList<MarkerSergi>())
+    val selectedCategory by mapViewModel.selectedCategory.observeAsState(null)
 
-    MyDrawer(navController = navController, mapViewModel = mapViewModel) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            state = lazyGridState,
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
+    MyDrawerWithFloatingButton(navController = navController, mapViewModel = mapViewModel) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // DropdownMenu para las opciones de filtrado
+            Box {
+                OutlinedTextField(
+                    value = texto,
+                    onValueChange = { /* No permitimos cambios directos aquí */ },
+                    enabled = false,
+                    readOnly = true,
+                    modifier = Modifier
+                        .clickable { mapViewModel.modifyExpandedMapa(true) }
+                        .fillMaxWidth()
+                )
 
-            items(marcadores) { marker ->
-                locationItem(marker, navController, mapViewModel)
+                DropdownMenu(
+                    expanded = mapViewModel.pillarExpandedMapa(),
+                    onDismissRequest = { mapViewModel.modifyExpandedMapa(false) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopStart)
+                ) {
+                    // Opción para mostrar todos los marcadores
+                    DropdownMenuItem(text = { Text(text = "Mostrar Todos") }, onClick = {
+                        mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
+                        mapViewModel.modifyExpandedMapa(false)
+                        texto =
+                            "Mostrar Todos" // Actualizar el texto al seleccionar la opción "Mostrar Todos"
+                    })
+
+                    // Opciones para las categorías
+                    categories.forEach { categoria ->
+                        DropdownMenuItem(text = { Text(text = categoria.name) }, onClick = {
+                            mapViewModel.setSelectedCategory(categoria)
+                            mapViewModel.modifyExpandedMapa(false)
+                            texto =
+                                categoria.name // Actualizar el texto al seleccionar una categoría
+                        })
+                    }
+                }
+            }
+
+            // LazyVerticalGrid para los marcadores
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                state = lazyGridState,
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+
+                val markersToShow = if (selectedCategory != null) {
+                    mapViewModel.getMarkersByCategory(selectedCategory!!) // si no es nulo filtro por categoria
+                } else {
+                    marcadores // Si es nulo cojo el valor de marcadores
+                }
+
+                items(markersToShow) { marker ->
+                    locationItem(marker, navController, mapViewModel)
+                }
             }
         }
     }
-
 }
+
 
 @Composable
 fun locationItem(
@@ -89,7 +159,7 @@ fun locationItem(
                     }
             )
             IconButton(
-                onClick = {mapViewModel.removeMarker(marker)},
+                onClick = { mapViewModel.removeMarker(marker) },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp) // Añade un poco de espacio alrededor del botón
