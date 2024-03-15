@@ -1,5 +1,6 @@
 package com.example.sergiitb_pr04_maps_app.viewmodel
 
+import android.graphics.Bitmap
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
@@ -16,6 +17,61 @@ import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.google.android.gms.maps.model.LatLng
 
 class MapViewModel : ViewModel() {
+    private val title = mutableStateOf("")
+    private val snippet = mutableStateOf("")
+    private val selectedCategoria = mutableStateOf<Categoria?>(null)
+    private val photoBitmap = mutableStateOf<Bitmap?>(null)
+    private val photoTaken = mutableStateOf(false)
+    private val showGuapo = mutableStateOf(false)
+
+    fun modifyTitle(newValue: String) {
+        title.value = newValue
+    }
+
+    fun getTitle(): String {
+        return title.value
+    }
+
+    fun modifySnippet(newValue: String) {
+        snippet.value = newValue
+    }
+
+    fun getSnippet(): String {
+        return snippet.value
+    }
+
+    fun modifySelectedCategory(newValue: Categoria?) {
+        selectedCategoria.value = newValue
+    }
+
+    fun getSelectedCategory(): Categoria? {
+        return selectedCategoria.value
+    }
+
+    fun modifyPhotoBitmap(newValue: Bitmap?) {
+        photoBitmap.value = newValue
+    }
+
+    fun getPhotoBitmap(): Bitmap? {
+        return photoBitmap.value
+    }
+
+    fun modifyPhotoTaken(newValue: Boolean) {
+        photoTaken.value = newValue
+    }
+
+    fun getPhotoTaken(): Boolean {
+        return photoTaken.value
+    }
+
+    fun modifyShowGuapo(newValue: Boolean) {
+        showGuapo.value = newValue
+    }
+
+    fun getShowGuapo(): Boolean {
+        return showGuapo.value
+    }
+
     var expanded by mutableStateOf(false)
         private set
     fun modifyExpanded(valorNuevo:Boolean){

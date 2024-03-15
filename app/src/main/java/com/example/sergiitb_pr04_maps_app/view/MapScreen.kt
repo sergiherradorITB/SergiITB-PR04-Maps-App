@@ -141,6 +141,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                             },
                             sheetState = sheetState
                         ) {
+                            resetearParametros(mapViewModel)
                             AddMarkerScreen(
                                 mapViewModel = mapViewModel,
                                 onCloseBottomSheet = {
@@ -175,4 +176,13 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
             Text(text = "Need permision")
         }
     })
+}
+
+fun resetearParametros(mapViewModel: MapViewModel) {
+    mapViewModel.modifyTitle("")
+    mapViewModel.modifySnippet("")
+    mapViewModel.modifySelectedCategory(null)
+    mapViewModel.modifyPhotoBitmap(null)
+    mapViewModel.modifyPhotoTaken(false)
+    mapViewModel.modifyShowGuapo(false)
 }

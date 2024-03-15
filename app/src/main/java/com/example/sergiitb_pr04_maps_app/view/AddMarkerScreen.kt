@@ -64,12 +64,6 @@ fun AddMarkerScreen(
     mapViewModel: MapViewModel,
     onCloseBottomSheet: () -> Unit
 ) {
-    var title by remember { mutableStateOf("") }
-    var snippet by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<Categoria?>(null) }
-    var photoBitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var photoTaken by remember { mutableStateOf(false) } // Nuevo estado
-
     val context = LocalContext.current
     val controller = remember {
         LifecycleCameraController(context).apply {
@@ -82,13 +76,12 @@ fun AddMarkerScreen(
         rememberPermissionState(permission = Manifest.permission.CAMERA)
     Column(Modifier.fillMaxSize()) {
 
-
         LaunchedEffect(Unit) {
             permissionState.launchPermissionRequest()
         }
         if (permissionState.status.isGranted) {
             // Mostrar la vista de captura de foto si no se ha tomado ninguna foto
-            if (!photoTaken) {
+            if (mapViewModel.getShowGuapo()) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     CameraPreview(controller = controller, modifier = Modifier.fillMaxSize())
                     IconButton(
@@ -114,8 +107,9 @@ fun AddMarkerScreen(
                         IconButton(
                             onClick = {
                                 takePhoto(context, controller) { photo ->
-                                    photoBitmap = photo
-                                    photoTaken = true // Actualizar el estado cuando se toma la foto
+                                    mapViewModel.modifyPhotoBitmap(photo)
+                                    mapViewModel.modifyShowGuapo(false)
+                                    mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
                                 }
                             }
                         ) {
@@ -134,8 +128,8 @@ fun AddMarkerScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     TextField(
-                        value = title,
-                        onValueChange = { title = it },
+                        value = mapViewModel.getTitle(),
+                        onValueChange = { mapViewModel.modifyTitle(it)},
                         label = { Text("Title") },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -143,12 +137,15 @@ fun AddMarkerScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     TextField(
-                        value = snippet,
-                        onValueChange = { snippet = it },
+                        value = mapViewModel.getSnippet(),
+                        onValueChange = { mapViewModel.modifySnippet(it) },
                         label = { Text("Snippet") },
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    Button(onClick = { mapViewModel.modifyShowGuapo(true) }) {
+                        Text(text = "Hacer foto")
+                    }
                     Spacer(modifier = Modifier.height(16.dp))
 
                     var texto by remember { mutableStateOf("Selecciona una categoría") }
@@ -175,7 +172,7 @@ fun AddMarkerScreen(
                         ) {
                             categories.forEach { categoria ->
                                 DropdownMenuItem(text = { Text(text = categoria.name) }, onClick = {
-                                    selectedCategory = categoria
+                                    mapViewModel.modifySelectedCategory(categoria)
                                     mapViewModel.modifyExpanded(false)
                                     texto =
                                         categoria.name // Actualizar el texto al seleccionar una categoría
@@ -188,18 +185,18 @@ fun AddMarkerScreen(
 
                     Button(
                         onClick = {
-                            if (selectedCategory == null) {
+                            if (mapViewModel.getSelectedCategory() == null || !mapViewModel.getPhotoTaken() || mapViewModel.getTitle() == "") {
                                 show = true
                             } else {
-                                val categoryToAdd = selectedCategory!!
+                                val categoryToAdd = mapViewModel.getSelectedCategory()!!
                                 val latLng = mapViewModel.getPosition()
-                                val photo = photoBitmap
+                                val photo = mapViewModel.getPhotoBitmap()
                                 val markerToAdd =
                                     photo?.let {
                                         MarkerSergi(
                                             latLng,
-                                            title,
-                                            snippet,
+                                            mapViewModel.getTitle(),
+                                            mapViewModel.getSnippet(),
                                             categoryToAdd,
                                             it
                                         )
@@ -265,7 +262,7 @@ fun MyDialog(show: Boolean, onDismiss: () -> Unit) {
                     .padding(24.dp)
                     .fillMaxWidth()
             ) {
-                Text(text = "Pon una categoria")
+                Text(text = "Faltan valores!")
             }
         }
     }
