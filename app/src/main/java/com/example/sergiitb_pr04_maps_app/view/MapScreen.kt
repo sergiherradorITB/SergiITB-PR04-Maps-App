@@ -8,11 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -39,10 +36,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sergiitb_pr04_maps_app.MainActivity
-import com.example.sergiitb_pr04_maps_app.MyDrawer
 import com.example.sergiitb_pr04_maps_app.MyDrawerWithFloatingButton
 import com.example.sergiitb_pr04_maps_app.model.Categoria
-import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -66,7 +61,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
     mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
-    val marcadores by mapViewModel.markers.observeAsState(emptyList<MarkerSergi>())
+    val marcadores by mapViewModel.markers.observeAsState(emptyList())
 
     MyDrawerWithFloatingButton(navController = navController, mapViewModel = mapViewModel, content = {
         val permissionState =
