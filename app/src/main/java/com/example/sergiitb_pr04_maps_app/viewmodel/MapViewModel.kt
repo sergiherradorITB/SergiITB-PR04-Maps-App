@@ -24,6 +24,27 @@ class MapViewModel : ViewModel() {
     private val photoTaken = mutableStateOf(false)
     private val showGuapo = mutableStateOf(false)
 
+    private val _cameraPermissionGranted = MutableLiveData(false)
+    val cameraPositionGranted = _cameraPermissionGranted
+
+    private val _shouldShowPermissionRationale = MutableLiveData(false)
+    val shouldShowPermissionRationale = _shouldShowPermissionRationale
+
+    private val _showPermissionDenied = MutableLiveData(false)
+    val showPermissionDenied = _showPermissionDenied
+
+    fun setCameraPermissionGranted(granted:Boolean){
+        _cameraPermissionGranted.value = granted
+    }
+
+    fun setShouldShowPermissionRationale(should:Boolean){
+        _shouldShowPermissionRationale.value = should
+    }
+
+    fun setShowPermissionDenied(denied:Boolean){
+        _showPermissionDenied
+    }
+
     fun modifyTitle(newValue: String) {
         title.value = newValue
     }

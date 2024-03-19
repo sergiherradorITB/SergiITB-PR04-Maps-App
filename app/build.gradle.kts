@@ -68,6 +68,9 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("androidx.navigation:navigation-compose:2.7.5")
+
+    // ICONS
+    implementation("androidx.compose.material:material-icons-extended:1.6.3")
     //LIVE DATA
     implementation("androidx.compose.runtime:runtime-livedata:1.6.0")
     //Material Design 3

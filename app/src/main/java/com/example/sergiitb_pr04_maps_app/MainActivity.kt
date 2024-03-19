@@ -23,8 +23,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
@@ -52,9 +50,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sergiitb_pr04_maps_app.view.AddMarkerScreen
+import com.example.sergiitb_pr04_maps_app.view.Camara
 import com.example.sergiitb_pr04_maps_app.view.ListMarkersScreen
 import com.example.sergiitb_pr04_maps_app.view.MapScreen
 import com.example.sergiitb_pr04_maps_app.view.MenuScreen
+import com.example.sergiitb_pr04_maps_app.view.TakePhotoScreen
 import com.example.sergiitb_pr04_maps_app.view.resetearParametros
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 import kotlinx.coroutines.launch
@@ -78,6 +78,12 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(Routes.ListMarkersScreen.route) {
                     ListMarkersScreen(navigationController, mapViewModel)
+                }
+                composable(Routes.Camara.route) {
+                    Camara(navigationController, mapViewModel)
+                }
+                composable(Routes.TakePhotoScreen.route) {
+                    TakePhotoScreen(navigationController, mapViewModel)
                 }
             }
         }
@@ -132,7 +138,7 @@ fun MyDrawerWithFloatingButton(
             }
         }
     }) {
-        MyScaffoldWithFloatingButton(mapViewModel, state, content)
+        MyScaffoldWithFloatingButton(mapViewModel, state, navController,content)
     }
 }
 
@@ -194,6 +200,7 @@ fun MyDrawer(
 fun MyScaffoldWithFloatingButton(
     mapViewModel: MapViewModel,
     state: DrawerState,
+    navController: NavController,
     content: @Composable () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
@@ -226,6 +233,7 @@ fun MyScaffoldWithFloatingButton(
                     resetearParametros(mapViewModel)
                     AddMarkerScreen(
                         mapViewModel = mapViewModel,
+                        navController = navController,
                         onCloseBottomSheet = {
                             scope.launch { sheetState.hide() }.invokeOnCompletion {
                                 if (!sheetState.isVisible) {

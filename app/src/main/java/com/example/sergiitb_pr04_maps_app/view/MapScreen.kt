@@ -51,6 +51,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -154,7 +155,8 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                         onMapLongClick = {
                             mapViewModel.changePosition(it)
                             showBottomSheet = true
-                        }
+                        },
+                        properties = MapProperties(isMyLocationEnabled = true, isIndoorEnabled = true, isBuildingEnabled = true, isTrafficEnabled = true)
                     )
                     {
                         if (showBottomSheet) {
@@ -167,6 +169,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                 resetearParametros(mapViewModel)
                                 AddMarkerScreen(
                                     mapViewModel = mapViewModel,
+                                    navController,
                                     onCloseBottomSheet = {
                                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                                             if (!sheetState.isVisible) {

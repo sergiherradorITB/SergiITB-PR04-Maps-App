@@ -1,16 +1,9 @@
 package com.example.sergiitb_pr04_maps_app.view
 
 import android.Manifest
-import android.content.Context
-import android.graphics.Bitmap
-import android.util.Log
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture.OnImageCapturedCallback
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.ImageProxy
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
-import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,9 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -46,11 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
@@ -62,15 +50,9 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun AddMarkerScreen(
     mapViewModel: MapViewModel,
+    navController: NavController,
     onCloseBottomSheet: () -> Unit
 ) {
-    val context = LocalContext.current
-    val controller = remember {
-        LifecycleCameraController(context).apply {
-            CameraController.IMAGE_CAPTURE
-        }
-    }
-
     val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
     val permissionState =
         rememberPermissionState(permission = Manifest.permission.CAMERA)
@@ -83,41 +65,11 @@ fun AddMarkerScreen(
             // Mostrar la vista de captura de foto si no se ha tomado ninguna foto
             if (mapViewModel.getShowGuapo()) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    CameraPreview(controller = controller, modifier = Modifier.fillMaxSize())
-                    IconButton(
-                        onClick = {
-                            controller.cameraSelector =
-                                if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
-                                    CameraSelector.DEFAULT_FRONT_CAMERA
-                                } else {
-                                    CameraSelector.DEFAULT_BACK_CAMERA
-                                }
-                        },
-                        modifier = Modifier.offset(16.dp, 16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Switch camera"
-                        )
-                    }
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        IconButton(
-                            onClick = {
-                                takePhoto(context, controller) { photo ->
-                                    mapViewModel.modifyPhotoBitmap(photo)
-                                    mapViewModel.modifyShowGuapo(false)
-                                    mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Create,
-                                contentDescription = "Take Photo"
-                            )
-                        }
+                        TakePhotoScreen(navigationController = navController, mapViewModel = mapViewModel)
                     }
                 }
             } else {
@@ -220,37 +172,6 @@ fun AddMarkerScreen(
     }
 }
 
-
-@Composable
-fun CameraPreview(controller: LifecycleCameraController, modifier: Modifier = Modifier) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    AndroidView(factory = {
-        PreviewView(it).apply {
-            this.controller = controller
-            controller.bindToLifecycle(lifecycleOwner)
-        }
-    }, modifier = modifier)
-}
-
-private fun takePhoto(
-    context: Context, controller: LifecycleCameraController,
-    onPhotoTaken: (Bitmap) -> Unit
-) {
-    controller.takePicture(
-        ContextCompat.getMainExecutor(context),
-        object : OnImageCapturedCallback() {
-            override fun onCaptureSuccess(image: ImageProxy) {
-                super.onCaptureSuccess(image)
-                onPhotoTaken(image.toBitmap())
-            }
-
-            override fun onError(exception: ImageCaptureException) {
-                super.onError(exception)
-                Log.e("Camera", "Error taken photo", exception)
-            }
-        }
-    )
-}
 
 @Composable
 fun MyDialog(show: Boolean, onDismiss: () -> Unit) {
