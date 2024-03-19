@@ -201,21 +201,21 @@ fun MyScaffoldWithFloatingButton(
     var showBottomSheet by remember { mutableStateOf(false) }
     Scaffold(
         topBar = { MyTopAppBar(mapViewModel, state) },
-        floatingActionButtonPosition = FabPosition.Center,
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                text = { Text("Add your position") },
-                icon = { Icon(Icons.Filled.Add, contentDescription = "") },
+    ) {
+        Box(Modifier.padding(it)) {
+            content() // Llamar al contenido pasado
+            Button(
                 onClick = {
                     showBottomSheet = true
                 },
                 modifier = Modifier
-                    .padding(start = 16.dp, bottom = 16.dp)
-            )
-        }
-    ) {
-        Box(Modifier.padding(it)) {
-            content() // Llamar al contenido pasado
+                    .align(Alignment.BottomStart)
+                    .padding(start = 16.dp, bottom = 33.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.Add, contentDescription = null) // Icono
+                }
+            }
             if (showBottomSheet) {
                 ModalBottomSheet(
                     onDismissRequest = {
