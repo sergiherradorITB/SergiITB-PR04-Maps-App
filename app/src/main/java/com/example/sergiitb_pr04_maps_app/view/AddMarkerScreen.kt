@@ -4,7 +4,9 @@ import android.Manifest
 import androidx.camera.core.CameraSelector
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -34,7 +38,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -95,12 +102,28 @@ fun AddMarkerScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Button(onClick = { mapViewModel.modifyShowGuapo(true) }) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { mapViewModel.modifyShowGuapo(true) },
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    ) {
                         Text(text = "Hacer foto")
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Mostrar la imagen debajo del botón de hacer foto
+                    val photoBitmap = mapViewModel.getPhotoBitmap()
+                    if (photoBitmap != null) {
+                        Image(
+                            bitmap = photoBitmap.asImageBitmap(),contentDescription = null,
+                            contentScale = ContentScale.Crop, modifier = Modifier.clip(CircleShape)
+                                .size(250.dp)
+                                .background(Color.Blue)
+                                .border(width = 1.dp, color = Color.White, shape = CircleShape)
+                        )
+                    }
 
                     var texto by remember { mutableStateOf("Selecciona una categoría") }
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Box(
                         modifier = Modifier

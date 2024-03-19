@@ -5,7 +5,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -17,6 +20,9 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +31,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Build
@@ -39,9 +47,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +63,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
+import com.example.sergiitb_pr04_maps_app.R
 import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 
@@ -130,11 +146,37 @@ fun openAppSettings(activity: Activity) {
 @Composable
 fun TakePhotoScreen(navigationController: NavController, mapViewModel: MapViewModel) {
     val context = LocalContext.current
+
     val controller = remember {
         LifecycleCameraController(context).apply {
             CameraController.IMAGE_CAPTURE
         }
     }
+    val img: Bitmap? =
+        ContextCompat.getDrawable(context, R.drawable.itb_bitmap)?.toBitmap()
+    var bitmap by remember { mutableStateOf(img) }
+
+    val launchImage = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = {
+            bitmap = if (Build.VERSION.SDK_INT < 28) {
+                MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+            } else {
+                val source = it?.let { it1 ->
+                    ImageDecoder.createSource(context.contentResolver, it1)
+                }
+                source?.let { it1 ->
+                    ImageDecoder.decodeBitmap(it1)
+                }!!
+            }
+            // Guardar la imagen en el ViewModel
+            bitmap?.let { mapViewModel.modifyPhotoBitmap(it) }
+            mapViewModel.modifyShowGuapo(false)
+            mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
+
+        })
+
+
     Box(modifier = Modifier.fillMaxSize()) {
         CameraPreview(controller = controller, modifier = Modifier.fillMaxSize())
         IconButton(
@@ -157,9 +199,7 @@ fun TakePhotoScreen(navigationController: NavController, mapViewModel: MapViewMo
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .align(
-                    Alignment.BottomCenter
-                )
+                .align(Alignment.BottomCenter)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -168,11 +208,12 @@ fun TakePhotoScreen(navigationController: NavController, mapViewModel: MapViewMo
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             ) {
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        imageVector = Icons.Default.Photo,
-                        contentDescription = "Open gallery"
-                    )
+                IconButton(
+                    onClick = {
+                        launchImage.launch("image/*")
+                    }
+                ) {
+                    Icon(imageVector = Icons.Default.Photo, contentDescription = "Open gallery")
                 }
                 IconButton(onClick = {
                     takePhoto(context, controller) { photo ->
@@ -187,6 +228,7 @@ fun TakePhotoScreen(navigationController: NavController, mapViewModel: MapViewMo
         }
     }
 }
+
 
 fun takePhoto(
     context: Context,
