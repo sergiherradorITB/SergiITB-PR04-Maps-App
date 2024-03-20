@@ -196,7 +196,6 @@ fun MyDrawer(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MyScaffold(
@@ -205,36 +204,11 @@ fun MyScaffold(
     navController: NavController,
     content: @Composable () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
-    var showBottomSheet by remember { mutableStateOf(false) }
     Scaffold(
         topBar = { MyTopAppBar(mapViewModel, state, navController) },
     ) {
         Box(Modifier.padding(it)) {
             content() // Llamar al contenido pasado
-
-            if (showBottomSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = {
-                        showBottomSheet = false
-                    },
-                    sheetState = sheetState
-                ) {
-                    resetearParametros(mapViewModel)
-                    AddMarkerScreen(
-                        mapViewModel = mapViewModel,
-                        navController = navController,
-                        onCloseBottomSheet = {
-                            scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                if (!sheetState.isVisible) {
-                                    showBottomSheet = false
-                                }
-                            }
-                        }
-                    )
-                }
-            }
         }
     }
 }

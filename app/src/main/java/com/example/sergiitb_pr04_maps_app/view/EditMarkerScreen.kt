@@ -1,6 +1,7 @@
 package com.example.sergiitb_pr04_maps_app.view
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,9 +21,14 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.sergiitb_pr04_maps_app.MyDrawer
 import com.example.sergiitb_pr04_maps_app.Routes
+import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 
 
 @Composable
@@ -32,6 +38,7 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
     var editedSnippet by remember { mutableStateOf(marker?.snippet ?: "") }
     var editedPhoto by remember { mutableStateOf(marker?.photo) }
     var showTakePhotoScreen by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
     MyDrawer(navController = navigationController, mapViewModel = mapViewModel) {
         Column(
@@ -99,10 +106,11 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
             ) {
                 Text("Save Changes")
             }
+
             Button(
                 onClick = {
-                    navigationController.navigate(Routes.ListMarkersScreen.route)
-                    marker?.let { mapViewModel.removeMarker(it) }
+
+                    showDialog = true
                 }, modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Borrar")
@@ -121,6 +129,56 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                 }
             )
         }
+        marker?.let {
+            MyDialogConfirmErase(
+                navigationController,
+                it,
+                mapViewModel,
+                showDialog
+            ) { showDialog = false }
+        }
+    }
+}
 
+@Composable
+fun MyDialogConfirmErase(
+    navigationController: NavController,
+    marker: MarkerSergi,
+    mapViewModel: MapViewModel,
+    show: Boolean,
+    onDismiss: () -> Unit
+) {
+    if (show) {
+        Dialog(onDismissRequest = { onDismiss() }) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .background(Color.White)
+                    .padding(24.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(text = "Estas seguro que quieres borrarlo?")
+                Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 13.dp),
+                ) {
+                    Button(onClick = {
+                        onDismiss()
+                        navigationController.navigate(Routes.ListMarkersScreen.route)
+                        marker.let { mapViewModel.removeMarker(marker) }
+                    }) {
+                        Text(text = "Sí")
+                    }
+                    Button(onClick = {
+                        onDismiss()
+                    }) {
+                        Text(text = "No")
+                    }
+                }
+
+            }
+        }
     }
 }
