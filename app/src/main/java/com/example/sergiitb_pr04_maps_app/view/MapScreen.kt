@@ -8,11 +8,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,148 +65,179 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
     mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
     val marcadores by mapViewModel.markers.observeAsState(emptyList())
 
-    MyDrawerWithFloatingButton(navController = navController, mapViewModel = mapViewModel, content = {
-        val permissionState =
-            rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
-        LaunchedEffect(Unit) {
-            permissionState.launchPermissionRequest()
-        }
-        if (permissionState.status.isGranted) {
-            val context = LocalContext.current
-            val fusedLocationProviderClient =
-                remember { LocationServices.getFusedLocationProviderClient(context) }
-            var lastKnownLocation by remember { mutableStateOf<Location?>(null) }
-            var deviceLatLng by remember { mutableStateOf(LatLng(0.0, 0.0)) }
-            val cameraPositionState =
-                rememberCameraPositionState {
-                    position = CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
-                }
-
-            val locationResult = fusedLocationProviderClient.getCurrentLocation(100, null)
-            locationResult.addOnCompleteListener(context as MainActivity) { task ->
-                if (task.isSuccessful) {
-                    lastKnownLocation = task.result
-                    deviceLatLng =
-                        LatLng(lastKnownLocation!!.latitude, lastKnownLocation!!.longitude)
-                    cameraPositionState.position = CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
-                    mapViewModel.changePosition(deviceLatLng)
-                } else {
-                    Log.e("Error", "Exception: %s", task.exception)
-                }
+    MyDrawerWithFloatingButton(
+        navController = navController,
+        mapViewModel = mapViewModel,
+        content = {
+            val permissionState =
+                rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
+            LaunchedEffect(Unit) {
+                permissionState.launchPermissionRequest()
             }
+            if (permissionState.status.isGranted) {
+                val context = LocalContext.current
+                val fusedLocationProviderClient =
+                    remember { LocationServices.getFusedLocationProviderClient(context) }
+                var lastKnownLocation by remember { mutableStateOf<Location?>(null) }
+                var deviceLatLng by remember { mutableStateOf(LatLng(0.0, 0.0)) }
+                val cameraPositionState =
+                    rememberCameraPositionState {
+                        position = CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
+                    }
 
-            Column {
-                val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
-                val selectedCategory by mapViewModel.selectedCategory.observeAsState(null)
-
-                var texto by remember { mutableStateOf("Selecciona que quieres mostrar") }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        value = texto,
-                        onValueChange = { /* No permitimos cambios directos aquí */ },
-                        enabled = false,
-                        readOnly = true,
-                        modifier = Modifier
-                            .clickable { mapViewModel.modifyExpandedMapa(true) }
-                            .fillMaxWidth()
-                    )
-
-                    DropdownMenu(
-                        expanded = mapViewModel.pillarExpandedMapa(),
-                        onDismissRequest = { mapViewModel.modifyExpandedMapa(false) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Opción para mostrar todos los marcadores
-                        DropdownMenuItem(text = { Text(text = "Mostrar Todos") }, onClick = {
-                            mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
-                            mapViewModel.modifyExpandedMapa(false)
-                            texto =
-                                "Mostrar Todos" // Actualizar el texto al seleccionar la opción "Mostrar Todos"
-                        })
-
-                        // Opciones para las categorías
-                        categories.forEach { categoria ->
-                            DropdownMenuItem(text = { Text(text = categoria.name) }, onClick = {
-                                mapViewModel.setSelectedCategory(categoria)
-                                mapViewModel.modifyExpandedMapa(false)
-                                texto =
-                                    categoria.name // Actualizar el texto al seleccionar una categoría
-                            })
-                        }
+                val locationResult = fusedLocationProviderClient.getCurrentLocation(100, null)
+                locationResult.addOnCompleteListener(context as MainActivity) { task ->
+                    if (task.isSuccessful) {
+                        lastKnownLocation = task.result
+                        deviceLatLng =
+                            LatLng(lastKnownLocation!!.latitude, lastKnownLocation!!.longitude)
+                        cameraPositionState.position =
+                            CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
+                        mapViewModel.changePosition(deviceLatLng)
+                    } else {
+                        Log.e("Error", "Exception: %s", task.exception)
                     }
                 }
+                Box() {
+                    Column {
+                        val categories: List<Categoria> by mapViewModel.categories.observeAsState(
+                            emptyList()
+                        )
+                        val selectedCategory by mapViewModel.selectedCategory.observeAsState(null)
 
+                        var texto by remember { mutableStateOf("Selecciona que quieres mostrar") }
 
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.Bottom,
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    GoogleMap(
-                        modifier = Modifier.fillMaxHeight(),
-                        cameraPositionState = cameraPositionState,
-                        onMapLongClick = {
-                            mapViewModel.changePosition(it)
-                            showBottomSheet = true
-                        },
-                        properties = MapProperties(isMyLocationEnabled = true, isIndoorEnabled = true, isBuildingEnabled = true, isTrafficEnabled = true)
-                    )
-                    {
-                        if (showBottomSheet) {
-                            ModalBottomSheet(
-                                onDismissRequest = {
-                                    showBottomSheet = false
-                                },
-                                sheetState = sheetState
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            OutlinedTextField(
+                                value = texto,
+                                onValueChange = { /* No permitimos cambios directos aquí */ },
+                                enabled = false,
+                                readOnly = true,
+                                modifier = Modifier
+                                    .clickable { mapViewModel.modifyExpandedMapa(true) }
+                                    .fillMaxWidth()
+                            )
+
+                            DropdownMenu(
+                                expanded = mapViewModel.pillarExpandedMapa(),
+                                onDismissRequest = { mapViewModel.modifyExpandedMapa(false) },
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                resetearParametros(mapViewModel)
-                                AddMarkerScreen(
-                                    mapViewModel = mapViewModel,
-                                    navController,
-                                    onCloseBottomSheet = {
-                                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                            if (!sheetState.isVisible) {
-                                                showBottomSheet = false
-                                            }
-                                        }
-                                    }
-                                )
+                                // Opción para mostrar todos los marcadores
+                                DropdownMenuItem(
+                                    text = { Text(text = "Mostrar Todos") },
+                                    onClick = {
+                                        mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
+                                        mapViewModel.modifyExpandedMapa(false)
+                                        texto =
+                                            "Mostrar Todos" // Actualizar el texto al seleccionar la opción "Mostrar Todos"
+                                    })
+
+                                // Opciones para las categorías
+                                categories.forEach { categoria ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = categoria.name) },
+                                        onClick = {
+                                            mapViewModel.setSelectedCategory(categoria)
+                                            mapViewModel.modifyExpandedMapa(false)
+                                            texto =
+                                                categoria.name // Actualizar el texto al seleccionar una categoría
+                                        })
+                                }
                             }
                         }
-                        // Filtrar marcadores por categoría seleccionada
-                        val markersToShow = if (selectedCategory != null) {
-                            mapViewModel.getMarkersByCategory(selectedCategory!!) // si no es nulo filtro por categoria
-                        } else {
-                            marcadores // Si es nulo cojo el valor de marcadores
-                        }
 
-                        markersToShow.forEach { marker ->
-                            Marker(
-                                state = MarkerState(marker.position),
-                                title = marker.title,
-                                snippet = marker.snippet,
+
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.Bottom,
+                            horizontalAlignment = Alignment.Start
+                        ) {
+                            GoogleMap(
+                                modifier = Modifier.fillMaxHeight(),
+                                cameraPositionState = cameraPositionState,
+                                onMapLongClick = {
+                                    mapViewModel.changePosition(it)
+                                    showBottomSheet = true
+                                },
+                                properties = MapProperties(
+                                    isMyLocationEnabled = true,
+                                    isIndoorEnabled = true,
+                                    isBuildingEnabled = true,
+                                    isTrafficEnabled = true
+                                )
+                            )
+                            {
+                                if (showBottomSheet) {
+                                    ModalBottomSheet(
+                                        onDismissRequest = {
+                                            showBottomSheet = false
+                                        },
+                                        sheetState = sheetState
+                                    ) {
+                                        resetearParametros(mapViewModel)
+                                        AddMarkerScreen(
+                                            mapViewModel = mapViewModel,
+                                            navController,
+                                            onCloseBottomSheet = {
+                                                scope.launch { sheetState.hide() }
+                                                    .invokeOnCompletion {
+                                                        if (!sheetState.isVisible) {
+                                                            showBottomSheet = false
+                                                        }
+                                                    }
+                                            }
+                                        )
+                                    }
+                                }
+                                // Filtrar marcadores por categoría seleccionada
+                                val markersToShow = if (selectedCategory != null) {
+                                    mapViewModel.getMarkersByCategory(selectedCategory!!) // si no es nulo filtro por categoria
+                                } else {
+                                    marcadores // Si es nulo cojo el valor de marcadores
+                                }
+
+                                markersToShow.forEach { marker ->
+                                    Marker(
+                                        state = MarkerState(marker.position),
+                                        title = marker.title,
+                                        snippet = marker.snippet,
+                                    )
+                                }
+                            }
+
+                            ExtendedFloatingActionButton(
+                                text = { Text("Show bottom sheet") },
+                                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                                onClick = { showBottomSheet = true },
+                                modifier = Modifier.padding(16.dp)
                             )
                         }
+
+
                     }
-
-                    ExtendedFloatingActionButton(
-                        text = { Text("Show bottom sheet") },
-                        icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                        onClick = { showBottomSheet = true },
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    Button(
+                        onClick = {
+                            showBottomSheet = true
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(start = 16.dp, bottom = 33.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Filled.Add, contentDescription = null) // Icono
+                        }
+                    }
                 }
-
-
+            } else {
+                Text(text = "Need permision")
             }
-        } else {
-            Text(text = "Need permision")
-        }
-    })
+        })
+
+
 }
 
 fun resetearParametros(mapViewModel: MapViewModel) {

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
@@ -139,7 +140,7 @@ fun MyDrawerWithFloatingButton(
             }
         }
     }) {
-        MyScaffoldWithFloatingButton(mapViewModel, state, navController,content)
+        MyScaffold(mapViewModel, state, navController,content)
     }
 }
 
@@ -198,7 +199,7 @@ fun MyDrawer(
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MyScaffoldWithFloatingButton(
+fun MyScaffold(
     mapViewModel: MapViewModel,
     state: DrawerState,
     navController: NavController,
@@ -208,22 +209,11 @@ fun MyScaffoldWithFloatingButton(
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
     Scaffold(
-        topBar = { MyTopAppBar(mapViewModel, state) },
+        topBar = { MyTopAppBar(mapViewModel, state, navController) },
     ) {
         Box(Modifier.padding(it)) {
             content() // Llamar al contenido pasado
-            Button(
-                onClick = {
-                    showBottomSheet = true
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(start = 16.dp, bottom = 33.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Add, contentDescription = null) // Icono
-                }
-            }
+
             if (showBottomSheet) {
                 ModalBottomSheet(
                     onDismissRequest = {
@@ -249,30 +239,9 @@ fun MyScaffoldWithFloatingButton(
     }
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-fun MyScaffold(
-    mapViewModel: MapViewModel,
-    state: DrawerState,
-    navController: NavController,
-    content: @Composable () -> Unit
-) {
-    Scaffold(
-        topBar = { MyTopAppBar(mapViewModel, state) },
-    ) {
-        Column(
-            Modifier.fillMaxSize(),
-        ) {
-            Box(Modifier.padding(it)) {
-                content() // Llamar al contenido pasado
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyTopAppBar(mapViewModel: MapViewModel, state: DrawerState) {
+fun MyTopAppBar(mapViewModel: MapViewModel, state: DrawerState, navController: NavController) {
     val scope = rememberCoroutineScope()
     TopAppBar(
         title = {
@@ -305,11 +274,11 @@ fun MyTopAppBar(mapViewModel: MapViewModel, state: DrawerState) {
         actions = {
             IconButton(
                 onClick = {
-                    //navigationController.navigate(Routes.DetailScreen.route)
-                }, //enabled = listScreenViewModel.pillarGhibliId() != ""
+                    navController.navigate(Routes.MapScreen.route)
+                },
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.Default.Map ,
                     contentDescription = "Back",
                     //tint = if (listScreenViewModel.pillarGhibliId() != "") Color.White else Color.Black
                 )
