@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EditLocationAlt
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -152,14 +153,16 @@ fun LocationItem(
                     }
             )
             IconButton(
-                onClick = { mapViewModel.removeMarker(marker) },
+                onClick = { /*mapViewModel.removeMarker(marker)*/
+                    mapViewModel.setEditingMarkers(marker)
+                    navController.navigate(Routes.EditMarker.route) },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp) // Añade un poco de espacio alrededor del botón
             ) {
                 Icon(
-                    Icons.Filled.Close,
-                    contentDescription = "Close",
+                    Icons.Filled.EditLocationAlt,
+                    contentDescription = "Edit",
                     tint = Color.Black // Cambia el color de la X si lo necesitas
                 )
             }

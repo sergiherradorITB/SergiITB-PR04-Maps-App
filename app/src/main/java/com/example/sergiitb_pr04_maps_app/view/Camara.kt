@@ -132,7 +132,11 @@ fun openAppSettings(activity: Activity) {
 }
 
 @Composable
-fun TakePhotoScreen(navigationController: NavController, mapViewModel: MapViewModel) {
+fun TakePhotoScreen(
+    navigationController: NavController,
+    mapViewModel: MapViewModel,
+    onPhotoCaptured: (Bitmap) -> Unit // Nuevo parámetro
+) {
     val context = LocalContext.current
 
     val controller = remember {
@@ -158,12 +162,14 @@ fun TakePhotoScreen(navigationController: NavController, mapViewModel: MapViewMo
                 }!!
             }
             // Guardar la imagen en el ViewModel
-            bitmap?.let { mapViewModel.modifyPhotoBitmap(it) }
-            mapViewModel.modifyShowGuapo(false)
+            bitmap?.let {
+                mapViewModel.modifyPhotoBitmap(it)
+                onPhotoCaptured(it) // Llamar a la función onPhotoCaptured
+            }
+            // mapViewModel.modifyShowGuapo(false)
             mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
-
-        })
-
+        }
+    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         CameraPreview(controller = controller, modifier = Modifier.fillMaxSize())
@@ -208,6 +214,7 @@ fun TakePhotoScreen(navigationController: NavController, mapViewModel: MapViewMo
                         mapViewModel.modifyPhotoBitmap(photo)
                         mapViewModel.modifyShowGuapo(false)
                         mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
+                        onPhotoCaptured(photo) // Llamar a la función onPhotoCaptured
                     }
                 }) {
                     Icon(imageVector = Icons.Default.Camera, contentDescription = "Take photo")
@@ -216,7 +223,6 @@ fun TakePhotoScreen(navigationController: NavController, mapViewModel: MapViewMo
         }
     }
 }
-
 
 fun takePhoto(
     context: Context,

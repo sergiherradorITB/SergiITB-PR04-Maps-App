@@ -51,15 +51,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sergiitb_pr04_maps_app.view.AddMarkerScreen
 import com.example.sergiitb_pr04_maps_app.view.Camara
+import com.example.sergiitb_pr04_maps_app.view.EditMarkerScreen
 import com.example.sergiitb_pr04_maps_app.view.ListMarkersScreen
 import com.example.sergiitb_pr04_maps_app.view.MapScreen
 import com.example.sergiitb_pr04_maps_app.view.MenuScreen
 import com.example.sergiitb_pr04_maps_app.view.TakePhotoScreen
 import com.example.sergiitb_pr04_maps_app.view.resetearParametros
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -85,8 +83,8 @@ class MainActivity : ComponentActivity() {
                 composable(Routes.Camara.route) {
                     Camara(navigationController, mapViewModel)
                 }
-                composable(Routes.TakePhotoScreen.route) {
-                    TakePhotoScreen(navigationController, mapViewModel)
+                composable(Routes.EditMarker.route) {
+                    EditMarkerScreen(navigationController, mapViewModel)
                 }
             }
         }

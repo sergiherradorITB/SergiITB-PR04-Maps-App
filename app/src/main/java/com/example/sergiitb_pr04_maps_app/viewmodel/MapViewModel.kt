@@ -141,6 +141,29 @@ class MapViewModel : ViewModel() {
         _markers.value = currentList
     }
 
+    // LiveData para la lista de marcadores
+    private val _editingMarkers = MutableLiveData<MarkerSergi>()
+    var editingMarkers: LiveData<MarkerSergi> = _editingMarkers
+
+    fun setEditingMarkers(marker: MarkerSergi) {
+        _editingMarkers.value = marker
+    }
+
+    fun editMarker(
+        marker: MarkerSergi,
+        editedTitle: String,
+        editedSnippet: String,
+        editedPhoto: Bitmap,
+        editedCategory: Categoria
+    ) {
+        marker.apply {
+            modificarTitle(editedTitle)
+            modificarSnippet(editedSnippet)
+            modificarPhoto(editedPhoto)
+            modificarCategory(editedCategory)
+        }
+    }
+
     private val _categories = MutableLiveData<MutableList<Categoria>>()
     val categories: LiveData<MutableList<Categoria>> = _categories
 
@@ -186,5 +209,15 @@ class MapViewModel : ViewModel() {
     // Método para obtener marcadores por categoría
     fun getMarkersByCategory(category: Categoria): List<MarkerSergi> {
         return _markers.value?.filter { it.category == category } ?: emptyList()
+    }
+
+    private var esPerModificar = false
+
+    fun modificarEsPerModificar(boolean: Boolean){
+        esPerModificar = boolean
+    }
+
+    fun pillarEsPerModificar():Boolean{
+        return esPerModificar
     }
 }

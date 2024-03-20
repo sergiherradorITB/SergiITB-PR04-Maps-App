@@ -67,7 +67,15 @@ fun AddMarkerScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        TakePhotoScreen(navigationController = navController, mapViewModel = mapViewModel)
+                        TakePhotoScreen(
+                            navigationController = navController,
+                            mapViewModel = mapViewModel,
+                            onPhotoCaptured = { photo ->
+                                // Aquí puedes manejar la foto capturada, por ejemplo, actualizar el estado o realizar otras acciones necesarias
+                                mapViewModel.modifyPhotoBitmap(photo)
+                                mapViewModel.modifyShowGuapo(false)
+                            }
+                        )
                     }
                 }
             } else {

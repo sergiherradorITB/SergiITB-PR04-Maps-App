@@ -8,4 +8,6 @@ sealed class Routes(val route:String) {
     object Camara:Routes("camara")
 
     object TakePhotoScreen:Routes("takephoto")
+    object EditMarker:Routes("editmarker")
+
 }
