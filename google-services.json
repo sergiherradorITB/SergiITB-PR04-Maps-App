@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "169168162425",
+    "project_id": "sergiitbmapapp",
+    "storage_bucket": "sergiitbmapapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:169168162425:android:a80fe1ff3713b237ef8ea8",
+        "android_client_info": {
+          "package_name": "com.example.sergiitb_pr04_maps_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCGkl4hsoz-_qtr6V2Z41z6jvxfW5JyA8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

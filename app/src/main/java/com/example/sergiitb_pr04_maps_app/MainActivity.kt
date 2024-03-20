@@ -57,6 +57,9 @@ import com.example.sergiitb_pr04_maps_app.view.MenuScreen
 import com.example.sergiitb_pr04_maps_app.view.TakePhotoScreen
 import com.example.sergiitb_pr04_maps_app.view.resetearParametros
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
