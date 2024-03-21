@@ -112,7 +112,7 @@ fun PermissionDeclinedScreen() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(text = "Permission required", fontWeight = FontWeight.Bold)
         Text(text = "This app needs access to the camera to take photos")

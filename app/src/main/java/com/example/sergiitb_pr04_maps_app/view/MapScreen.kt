@@ -2,6 +2,7 @@ package com.example.sergiitb_pr04_maps_app.view
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.location.Location
 import android.util.Log
 import androidx.compose.foundation.clickable
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -35,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sergiitb_pr04_maps_app.MainActivity
@@ -47,6 +50,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
@@ -74,6 +79,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
             LaunchedEffect(Unit) {
                 permissionState.launchPermissionRequest()
             }
+
             if (permissionState.status.isGranted) {
                 val context = LocalContext.current
                 val fusedLocationProviderClient =
@@ -233,13 +239,30 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                     }
                 }
             } else {
-                Text(text = "Need permision")
+                // Text(text = "Need permision")
+                PermissionDeclinedScreenMap()
+
             }
         })
 
 
 }
 
+@Composable
+fun PermissionDeclinedScreenMap() {
+    val context = LocalContext.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text(text = "Permission required", fontWeight = FontWeight.Bold)
+        Text(text = "This app needs access to your position")
+        Button(onClick = { openAppSettings(context as Activity) }) {
+            Text(text = "Accept")
+        }
+    }
+}
 fun resetearParametros(mapViewModel: MapViewModel) {
     mapViewModel.modifyTitle("")
     mapViewModel.modifySnippet("")

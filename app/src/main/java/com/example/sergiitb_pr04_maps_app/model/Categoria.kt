@@ -5,6 +5,5 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 class Categoria(
     val name: String,
-    val imageResId: ImageVector, // ID de recurso de imagen
     val colorResId: Color   // ID de recurso de color
 )

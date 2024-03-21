@@ -1,6 +1,8 @@
 package com.example.sergiitb_pr04_maps_app.viewmodel
 
+import android.content.ContentValues.TAG
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
@@ -15,6 +17,11 @@ import androidx.lifecycle.ViewModel
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import java.io.ByteArrayOutputStream
 
 class MapViewModel : ViewModel() {
     private val title = mutableStateOf("")
@@ -33,15 +40,39 @@ class MapViewModel : ViewModel() {
     private val _showPermissionDenied = MutableLiveData(false)
     val showPermissionDenied = _showPermissionDenied
 
-    fun setCameraPermissionGranted(granted:Boolean){
+    /* NO VA TODO
+    private val database = FirebaseFirestore.getInstance()
+
+    fun addMarkerToDatabase(marker: MarkerSergi){
+        database.collection("users")
+            .add(
+                hashMapOf(
+                    "Title" to marker.title,
+                    "Snippet" to marker.snippet,
+                    "Latitude" to marker.position.latitude
+                ))
+    }
+
+    fun getUsers(): CollectionReference {
+        return database.collection("users")
+    }
+    */
+    // Función para convertir un Bitmap a un ByteArray
+    private fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        return outputStream.toByteArray()
+    }
+
+    fun setCameraPermissionGranted(granted: Boolean) {
         _cameraPermissionGranted.value = granted
     }
 
-    fun setShouldShowPermissionRationale(should:Boolean){
+    fun setShouldShowPermissionRationale(should: Boolean) {
         _shouldShowPermissionRationale.value = should
     }
 
-    fun setShowPermissionDenied(denied:Boolean){
+    fun setShowPermissionDenied(denied: Boolean) {
         _showPermissionDenied
     }
 
@@ -95,30 +126,32 @@ class MapViewModel : ViewModel() {
 
     var expanded by mutableStateOf(false)
         private set
-    fun modifyExpanded(valorNuevo:Boolean){
+
+    fun modifyExpanded(valorNuevo: Boolean) {
         expanded = valorNuevo
     }
 
-    fun pillarExpanded():Boolean{
+    fun pillarExpanded(): Boolean {
         return expanded
     }
 
     var expandedMapa by mutableStateOf(false)
         private set
-    fun modifyExpandedMapa(valorNuevo:Boolean){
+
+    fun modifyExpandedMapa(valorNuevo: Boolean) {
         expandedMapa = valorNuevo
     }
 
-    fun pillarExpandedMapa():Boolean{
+    fun pillarExpandedMapa(): Boolean {
         return expandedMapa
     }
 
     private var position = LatLng(41.4534265, 2.1837151)
-    fun changePosition(positionNueva:LatLng){
+    fun changePosition(positionNueva: LatLng) {
         position = positionNueva
     }
 
-    fun getPosition():LatLng{
+    fun getPosition(): LatLng {
         return position
     }
 
@@ -171,9 +204,9 @@ class MapViewModel : ViewModel() {
         // Inicializar la lista de categorías si es necesario
         if (_categories.value == null) {
             _categories.value = mutableListOf(
-                Categoria("Info", Icons.Filled.Info, Color.Green),
-                Categoria("Likes", Icons.Filled.ThumbUp, Color.Yellow),
-                Categoria("Favoritos", Icons.Filled.Star, Color.Cyan)
+                Categoria("Info", Color.Green),
+                Categoria("Likes", Color.Yellow),
+                Categoria("Favoritos", Color.Cyan)
             )
         }
     }
@@ -213,11 +246,11 @@ class MapViewModel : ViewModel() {
 
     private var esPerModificar = false
 
-    fun modificarEsPerModificar(boolean: Boolean){
+    fun modificarEsPerModificar(boolean: Boolean) {
         esPerModificar = boolean
     }
 
-    fun pillarEsPerModificar():Boolean{
+    fun pillarEsPerModificar(): Boolean {
         return esPerModificar
     }
 }

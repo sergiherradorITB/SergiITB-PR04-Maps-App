@@ -30,7 +30,7 @@ fun MenuScreen(mapViewModel: MapViewModel, navController: NavController) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
-
+    // var markers = mapViewModel.getUsers()
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         MyDrawer(
             navController,
@@ -38,6 +38,7 @@ fun MenuScreen(mapViewModel: MapViewModel, navController: NavController) {
             content = {
                 Column(
                 ) {
+                    // Text(text = markers.path)
                     if (showBottomSheet) {
                         ModalBottomSheet(
                             onDismissRequest = {

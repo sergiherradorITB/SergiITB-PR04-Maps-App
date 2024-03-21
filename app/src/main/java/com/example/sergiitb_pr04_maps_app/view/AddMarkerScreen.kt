@@ -118,7 +118,8 @@ fun AddMarkerScreen(
                     if (photoBitmap != null) {
                         Image(
                             bitmap = photoBitmap.asImageBitmap(),contentDescription = null,
-                            contentScale = ContentScale.Crop, modifier = Modifier.clip(CircleShape)
+                            contentScale = ContentScale.Crop, modifier = Modifier
+                                .clip(CircleShape)
                                 .size(250.dp)
                                 .background(Color.Blue)
                                 .border(width = 1.dp, color = Color.White, shape = CircleShape)
@@ -181,6 +182,7 @@ fun AddMarkerScreen(
                                     }
                                 if (markerToAdd != null) {
                                     mapViewModel.addMarker(markerToAdd)
+                                    // mapViewModel.addMarkerToDatabase(markerToAdd)
                                 }
                                 onCloseBottomSheet()
                             }
@@ -193,7 +195,7 @@ fun AddMarkerScreen(
                 }
             }
         } else {
-            Text(text = "Peru")
+            PermissionDeclinedScreen()
         }
     }
 }
