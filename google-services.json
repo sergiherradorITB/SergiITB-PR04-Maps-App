@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "704928053566",
-    "project_id": "sergimapita",
-    "storage_bucket": "sergimapita.appspot.com"
+    "project_number": "1010468137330",
+    "project_id": "pueseso-5f478",
+    "storage_bucket": "pueseso-5f478.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:704928053566:android:79d991b809f9610d23946f",
+        "mobilesdk_app_id": "1:1010468137330:android:237d99fbad6d33253115eb",
         "android_client_info": {
           "package_name": "com.example.sergiitb_pr04_maps_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBgNQkt-fWKgd5DpRwzD176DNjvby2ydXU"
+          "current_key": "AIzaSyC5nLXrcencmz82WDmddkhX2cWwW6ePkcE"
         }
       ],
       "services": {
