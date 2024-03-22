@@ -66,6 +66,9 @@ class MapViewModel : ViewModel() {
 
     var repository:Repository = Repository()
 
+    private val _cargando = MutableLiveData(true)
+    val cargando = _cargando
+
     fun pillarTodosMarkers(){
         repository.getMarkers().addSnapshotListener{value, error ->
             if (error != null){
@@ -82,6 +85,7 @@ class MapViewModel : ViewModel() {
             }
             _markers.value = tempList
         }
+        // _cargando.value = false
     }
 
     fun setCameraPermissionGranted(granted: Boolean) {

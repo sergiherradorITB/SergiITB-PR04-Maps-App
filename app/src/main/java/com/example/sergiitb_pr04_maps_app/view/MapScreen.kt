@@ -69,7 +69,8 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
     var showBottomSheet by remember { mutableStateOf(false) }
     mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
     val marcadores by mapViewModel.markers.observeAsState(emptyList())
-    // mapViewModel.pillarTodosMarkers()
+    mapViewModel.pillarTodosMarkers()
+
 
     MyDrawerWithFloatingButton(
         navController = navController,
@@ -110,7 +111,9 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                         val categories: List<Categoria> by mapViewModel.categories.observeAsState(
                             emptyList()
                         )
-                        val selectedCategory by mapViewModel.selectedCategory.observeAsState(null)
+                        val selectedCategory by mapViewModel.selectedCategory.observeAsState(
+                            null
+                        )
 
                         var texto by remember { mutableStateOf("Selecciona que quieres mostrar") }
 
@@ -207,12 +210,23 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                     marcadores // Si es nulo cojo el valor de marcadores
                                 }
 
+                                /*Marker(
+                                    state = MarkerState(LatLng(41.45348211268961,2.186613567173481)),
+                                    title = "Hola",
+                                    snippet = "Peru"
+                                )*/
+
                                 markersToShow.forEach { marker ->
                                     Marker(
-                                            state = MarkerState(LatLng(marker.latitude,marker.latitude)),
-                                            title = marker.title,
-                                            snippet = marker.snippet,
-                                        )
+                                        state = MarkerState(
+                                            LatLng(
+                                                marker.latitude,
+                                                marker.longitude
+                                            )
+                                        ), // no los muestra en la posicion D:
+                                        title = marker.title,
+                                        snippet = marker.snippet,
+                                    )
                                 }
                             }
 
@@ -246,7 +260,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
             }
         })
 
-
 }
 
 @Composable
@@ -264,6 +277,7 @@ fun PermissionDeclinedScreenMap() {
         }
     }
 }
+
 fun resetearParametros(mapViewModel: MapViewModel) {
     mapViewModel.modifyTitle("")
     mapViewModel.modifySnippet("")
