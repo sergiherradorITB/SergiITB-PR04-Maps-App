@@ -89,11 +89,13 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                 label = { Text("Snippet") },
                 modifier = Modifier.fillMaxWidth()
             )
+            
+            // Text(text = marker?.position.toString())
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Botón para guardar los cambios
-            Button(
+            /*Button(
                 onClick = {
                     marker?.apply {
                         modificarTitle(editedTitle)
@@ -106,6 +108,8 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
             ) {
                 Text("Save Changes")
             }
+
+             */
 
             Button(
                 onClick = {

@@ -2,8 +2,8 @@ plugins {
     id("com.android.application")
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
-
     id("org.jetbrains.kotlin.android")
+
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
@@ -99,11 +99,11 @@ dependencies {
 
     // Add the dependency for the Firebase Authentication library
     // When using the BoM, you don't specify versions in Firebase library dependencies
-    implementation("com.google.firebase:firebase-auth")
+    // implementation("com.google.firebase:firebase-auth")
 
     // Declare the dependency for the Cloud Firestore library
     // When using the BoM, you don't specify versions in Firebase library dependencies
-    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-firestore-ktx")
 
 }
 

@@ -16,8 +16,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
+import com.example.sergiitb_pr04_maps_app.model.Repository
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -40,28 +42,46 @@ class MapViewModel : ViewModel() {
     private val _showPermissionDenied = MutableLiveData(false)
     val showPermissionDenied = _showPermissionDenied
 
-    /* NO VA TODO
     private val database = FirebaseFirestore.getInstance()
 
-    fun addMarkerToDatabase(marker: MarkerSergi){
-        database.collection("users")
+
+    // LiveData para la lista de marcadores
+    private val _markers = MutableLiveData<MutableList<MarkerSergi>>()
+    val markers: LiveData<MutableList<MarkerSergi>> = _markers
+
+
+    fun addMarkerToDatabase(marker: MarkerSergi) {
+        database.collection("markers")
             .add(
                 hashMapOf(
-                    "Title" to marker.title,
-                    "Snippet" to marker.snippet,
-                    "Latitude" to marker.position.latitude
-                ))
+                    "positionLatitude" to (marker.latitude),
+                    "positionLongitude" to (marker.longitude),
+                    "title" to marker.title,
+                    "snippet" to marker.snippet,
+                    // "foto" to marker.photo
+                    )
+            )
+        println("Hola :( $marker")
     }
 
-    fun getUsers(): CollectionReference {
-        return database.collection("users")
-    }
-    */
-    // Función para convertir un Bitmap a un ByteArray
-    private fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
-        val outputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        return outputStream.toByteArray()
+    var repository:Repository = Repository()
+
+    fun pillarTodosMarkers(){
+        repository.getMarkers().addSnapshotListener{value, error ->
+            if (error != null){
+                Log.e("Firestore error", error.message.toString())
+                return@addSnapshotListener
+            }
+            val tempList = mutableListOf<MarkerSergi>()
+            for (dc:DocumentChange in value?.documentChanges!!){
+                if (dc.type == DocumentChange.Type.ADDED){
+                    val newMarker = dc.document.toObject(MarkerSergi::class.java)
+                    newMarker.userId = dc.document.id
+                    tempList.add(newMarker)
+                }
+            }
+            _markers.value = tempList
+        }
     }
 
     fun setCameraPermissionGranted(granted: Boolean) {
@@ -155,10 +175,6 @@ class MapViewModel : ViewModel() {
         return position
     }
 
-    // LiveData para la lista de marcadores
-    private val _markers = MutableLiveData<MutableList<MarkerSergi>>()
-    val markers: LiveData<MutableList<MarkerSergi>> = _markers
-
     // Añadir marcador a la lista
     // Método para agregar un nuevo marcador
     fun addMarker(marker: MarkerSergi) {
@@ -182,7 +198,7 @@ class MapViewModel : ViewModel() {
         _editingMarkers.value = marker
     }
 
-    fun editMarker(
+    /*fun editMarker(
         marker: MarkerSergi,
         editedTitle: String,
         editedSnippet: String,
@@ -196,6 +212,8 @@ class MapViewModel : ViewModel() {
             modificarCategory(editedCategory)
         }
     }
+
+     */
 
     private val _categories = MutableLiveData<MutableList<Categoria>>()
     val categories: LiveData<MutableList<Categoria>> = _categories

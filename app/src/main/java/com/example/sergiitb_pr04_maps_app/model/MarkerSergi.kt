@@ -1,27 +1,76 @@
 package com.example.sergiitb_pr04_maps_app.model
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.BitmapFactory.decodeResource
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
+import android.icu.text.CaseMap.Title
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.sergiitb_pr04_maps_app.R
 import com.google.android.gms.maps.model.LatLng
 
-class MarkerSergi {
-    var position: LatLng
+
+data class MarkerSergi(
+    var userId:String?,
+    var latitude:Double,
+    var longitude:Double,
+    var title:String,
+    var snippet:String,
+    var category: Categoria,
+    var photo:Bitmap?
+){
+    constructor():this(null,0.0,0.0,"","",Categoria("",Color.Black),null)
+}
+
+/*class MarkerSergi {
+    var userId:String? = null
+    var position: LatLng = LatLng(0.0,0.0)
     var title: String
     var snippet: String
     var category: Categoria // Referencia a la categoría
-    var photo:Bitmap
+    var photo: Bitmap? = null
 
-    constructor(position: LatLng, title: String, snippet: String, categoria: Categoria, photo:Bitmap) {
+    constructor(
+        userId:String?,
+        position: LatLng,
+        title: String,
+        snippet: String,
+        categoria: Categoria,
+        photo: Bitmap?
+    ) {
+        this.userId = userId
         this.position = position
         this.title = title
         this.snippet = snippet
         this.category = categoria
+        this.photo = photo
+    }
+
+    constructor(
+        position: LatLng,
+        title: String,
+        snippet: String,
+        categoria: Categoria,
+        photo: Bitmap?
+    ) {
+        this.position = position
+        this.title = title
+        this.snippet = snippet
+        this.category = categoria
+        this.photo = photo
+    }
+
+    constructor(
+        userId: String?,
+        latitude: Double,
+        longitude: Double,
+        title: String,
+        snippet: String,
+        nombreCategoria:String,
+        colorCategoria:Color,
+        photo: Bitmap?
+    ) {
+        this.userId = userId
+        this.position = LatLng(latitude, longitude)
+        this.title = title
+        this.snippet = snippet
+        this.category = Categoria(nombreCategoria,colorCategoria)
         this.photo = photo
     }
 
@@ -31,7 +80,7 @@ class MarkerSergi {
     }
 
     // pillarter para la posición
-    fun pillarPosition(): LatLng {
+    fun pillarPosition(): LatLng? {
         return position
     }
 
@@ -71,7 +120,9 @@ class MarkerSergi {
     }
 
     // pillarter para la foto
-    fun pillarPhoto(): Bitmap {
+    fun pillarPhoto(): Bitmap? {
         return photo
     }
 }
+
+ */

@@ -72,6 +72,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
 
+    mapViewModel.pillarTodosMarkers()
 
     MyDrawerWithFloatingButton(navController = navController, mapViewModel = mapViewModel) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -136,7 +137,9 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                         }
                     }
                 } else {
+
                     // LazyVerticalGrid para los marcadores
+
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
                         state = lazyGridState,
@@ -211,20 +214,22 @@ fun LocationItem(
             .padding(2.dp)
     ) {
         Box {
-            Image(
-                bitmap = marker.photo.asImageBitmap(),
-                contentDescription = "itb-defaultLogo",
-                contentScale = ContentScale.FillBounds, // no se si dejarlo pero bueno
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0.4f) // Ajusta la transparencia de la imagen
-                    .size(250.dp)
-                    //.background(marker.category.colorResId)
-                    .clickable {
-                        mapViewModel.changePosition(marker.position)
-                        navController.navigate(Routes.MapScreen.route)
-                    }
-            )
+            marker.photo?.let {
+                Image(
+                    bitmap = it.asImageBitmap(),
+                    contentDescription = "itb-defaultLogo",
+                    contentScale = ContentScale.FillBounds, // no se si dejarlo pero bueno
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(0.4f) // Ajusta la transparencia de la imagen
+                        .size(250.dp)
+                        //.background(marker.category.colorResId)
+                        .clickable {
+                            // marker.latitude?.let { mapViewModel.changePosition(it) }
+                            navController.navigate(Routes.MapScreen.route)
+                        }
+                )
+            }
             IconButton(
                 onClick = { /*mapViewModel.removeMarker(marker)*/
                     mapViewModel.setEditingMarkers(marker)

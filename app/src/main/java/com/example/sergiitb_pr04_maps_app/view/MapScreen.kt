@@ -69,6 +69,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
     var showBottomSheet by remember { mutableStateOf(false) }
     mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
     val marcadores by mapViewModel.markers.observeAsState(emptyList())
+    // mapViewModel.pillarTodosMarkers()
 
     MyDrawerWithFloatingButton(
         navController = navController,
@@ -208,10 +209,10 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
 
                                 markersToShow.forEach { marker ->
                                     Marker(
-                                        state = MarkerState(marker.position),
-                                        title = marker.title,
-                                        snippet = marker.snippet,
-                                    )
+                                            state = MarkerState(LatLng(marker.latitude,marker.latitude)),
+                                            title = marker.title,
+                                            snippet = marker.snippet,
+                                        )
                                 }
                             }
 

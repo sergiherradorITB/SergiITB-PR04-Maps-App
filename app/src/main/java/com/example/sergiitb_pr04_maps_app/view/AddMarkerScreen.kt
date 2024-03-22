@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,7 +20,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -173,7 +171,9 @@ fun AddMarkerScreen(
                                 val markerToAdd =
                                     photo?.let {
                                         MarkerSergi(
-                                            latLng,
+                                            null,
+                                            latLng.latitude,
+                                            latLng.longitude,
                                             mapViewModel.getTitle(),
                                             mapViewModel.getSnippet(),
                                             categoryToAdd,
@@ -181,8 +181,10 @@ fun AddMarkerScreen(
                                         )
                                     }
                                 if (markerToAdd != null) {
-                                    mapViewModel.addMarker(markerToAdd)
-                                    // mapViewModel.addMarkerToDatabase(markerToAdd)
+                                    // mapViewModel.addMarker(markerToAdd)
+                                    mapViewModel.addMarkerToDatabase(markerToAdd)
+
+                                    // mapViewModel.addExampleToDatabase(Prueba("peru","gilipollas"))
                                 }
                                 onCloseBottomSheet()
                             }
