@@ -82,12 +82,15 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
             )
 
             // Botón para guardar los cambios
+
+
             Button(
                 onClick = {
                     marker?.apply {
                         modificarTitle(mapViewModel.editedTitle)
                         modificarSnippet(mapViewModel.editedSnippet)
                         mapViewModel.editedPhoto?.let { modificarPhoto(it) }
+                        mapViewModel.updateMarker(this) // Pasar el marcador actual después de aplicar los cambios
                     }
                     navigationController.navigate(Routes.ListMarkersScreen.route)
                 },

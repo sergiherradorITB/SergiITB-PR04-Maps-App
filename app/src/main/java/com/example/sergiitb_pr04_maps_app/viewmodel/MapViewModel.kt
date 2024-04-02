@@ -282,9 +282,20 @@ class MapViewModel : ViewModel() {
     }
 
 
-
     fun deleteMarker(markerId:String){
         database.collection("markers").document(markerId).delete()
+    }
+
+    fun updateMarker(editedMarker:MarkerSergi){
+        database.collection("markers").document(editedMarker.markerId!!).set(
+            hashMapOf(
+                "positionLatitude" to (editedMarker.latitude),
+                "positionLongitude" to (editedMarker.longitude),
+                "title" to editedMarker.title,
+                "snippet" to editedMarker.snippet,
+                "categoryName" to editedMarker.category.name,
+            )
+        )
     }
 
     fun uploadImage(imageUri: Uri){

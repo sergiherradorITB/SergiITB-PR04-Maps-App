@@ -210,12 +210,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                     marcadores // Si es nulo cojo el valor de marcadores
                                 }
 
-                                /*Marker(
-                                    state = MarkerState(LatLng(41.45348211268961,2.186613567173481)),
-                                    title = "Hola",
-                                    snippet = "Peru"
-                                )*/
-
                                 markersToShow.forEach { marker ->
                                     Marker(
                                         state = MarkerState(
@@ -256,7 +250,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
             } else {
                 // Text(text = "Need permision")
                 PermissionDeclinedScreenMap()
-
             }
         })
 
