@@ -18,9 +18,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Dialog
@@ -34,11 +31,9 @@ import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 @Composable
 fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapViewModel) {
     val marker by mapViewModel.editingMarkers.observeAsState()
-    var editedTitle by remember { mutableStateOf(marker?.title ?: "") }
-    var editedSnippet by remember { mutableStateOf(marker?.snippet ?: "") }
-    var editedPhoto by remember { mutableStateOf(marker?.photo) }
-    var showTakePhotoScreen by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false) }
+
+    mapViewModel.modificarEditedTitle(marker!!.title)
+    mapViewModel.modificarEditedSnippet(marker!!.snippet)
 
     MyDrawer(navController = navigationController, mapViewModel = mapViewModel) {
         Column(
@@ -47,7 +42,7 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                 .padding(16.dp)
         ) {
             // Mostrar la imagen del marcador
-            editedPhoto?.let {
+            mapViewModel.editedPhoto?.let {
                 Image(
                     bitmap = it.asImageBitmap(),
                     contentDescription = null,
@@ -58,12 +53,10 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
             // Botón para editar la foto del marcador
             Button(
                 onClick = {
-                    showTakePhotoScreen = true
+                    mapViewModel.modificarShowTakePhotoScreen(true)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -74,33 +67,27 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
 
             // Campo de texto para editar el título
             OutlinedTextField(
-                value = editedTitle,
-                onValueChange = { editedTitle = it },
+                value = mapViewModel.editedTitle,
+                onValueChange = { mapViewModel.modificarEditedTitle(it) },
                 label = { Text("Title") },
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
             // Campo de texto para editar el fragmento
             OutlinedTextField(
-                value = editedSnippet,
-                onValueChange = { editedSnippet = it },
+                value = mapViewModel.editedSnippet,
+                onValueChange = { mapViewModel.modificarEditedSnippet(it) },
                 label = { Text("Snippet") },
                 modifier = Modifier.fillMaxWidth()
             )
-            
-            // Text(text = marker?.position.toString())
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             // Botón para guardar los cambios
-            /*Button(
+            Button(
                 onClick = {
                     marker?.apply {
-                        modificarTitle(editedTitle)
-                        modificarSnippet(editedSnippet)
-                        editedPhoto?.let { modificarPhoto(it) }
+                        modificarTitle(mapViewModel.editedTitle)
+                        modificarSnippet(mapViewModel.editedSnippet)
+                        mapViewModel.editedPhoto?.let { modificarPhoto(it) }
                     }
                     navigationController.navigate(Routes.ListMarkersScreen.route)
                 },
@@ -109,12 +96,10 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                 Text("Save Changes")
             }
 
-             */
-
+            // Botón para borrar
             Button(
                 onClick = {
-
-                    showDialog = true
+                    mapViewModel.modificarShowDialog(true)
                 }, modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Borrar")
@@ -122,14 +107,13 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
         }
 
         // Mostrar la pantalla de captura de foto si showTakePhotoScreen es verdadero
-        if (showTakePhotoScreen) {
+        if (mapViewModel.showTakePhotoScreen) {
             TakePhotoScreen(
                 navigationController = navigationController,
                 mapViewModel = mapViewModel,
                 onPhotoCaptured = { photo ->
-                    // Aquí puedes manejar la foto capturada, por ejemplo, actualizar el estado o realizar otras acciones necesarias
-                    editedPhoto = photo
-                    showTakePhotoScreen = false
+                    mapViewModel.modificarEditedPhoto(photo)
+                    mapViewModel.modificarShowTakePhotoScreen(false)
                 }
             )
         }
@@ -138,8 +122,8 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                 navigationController,
                 it,
                 mapViewModel,
-                showDialog
-            ) { showDialog = false }
+                mapViewModel.showDialog
+            ) { mapViewModel.modificarShowDialog(false) }
         }
     }
 }
@@ -171,7 +155,7 @@ fun MyDialogConfirmErase(
                     Button(onClick = {
                         onDismiss()
                         navigationController.navigate(Routes.ListMarkersScreen.route)
-                        marker.let { mapViewModel.removeMarker(marker) }
+                        marker.markerId?.let { mapViewModel.deleteMarker(it) }
                     }) {
                         Text(text = "Sí")
                     }

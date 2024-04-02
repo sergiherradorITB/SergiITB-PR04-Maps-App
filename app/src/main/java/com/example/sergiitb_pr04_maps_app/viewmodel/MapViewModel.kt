@@ -1,13 +1,8 @@
 package com.example.sergiitb_pr04_maps_app.viewmodel
 
-import android.content.ContentValues.TAG
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -19,18 +14,50 @@ import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.model.Repository
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
-import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class MapViewModel : ViewModel() {
+
+    var editedTitle by mutableStateOf("")
+        private set
+
+    var editedSnippet by mutableStateOf("")
+        private set
+
+    var editedPhoto by mutableStateOf<Bitmap?>(null)
+        private set
+
+    var showTakePhotoScreen by mutableStateOf(false)
+        private set
+
+    var showDialog by mutableStateOf(false)
+        private set
+
+    fun modificarEditedTitle(title: String) {
+        editedTitle = title
+    }
+
+    fun modificarEditedSnippet(snippet: String) {
+        editedSnippet = snippet
+    }
+
+    fun modificarEditedPhoto(photo: Bitmap?) {
+        editedPhoto = photo
+    }
+
+    fun modificarShowTakePhotoScreen(value: Boolean) {
+        showTakePhotoScreen = value
+    }
+
+    fun modificarShowDialog(value: Boolean) {
+        showDialog = value
+    }
+
     private val title = mutableStateOf("")
     private val snippet = mutableStateOf("")
     private val selectedCategoria = mutableStateOf<Categoria?>(null)
@@ -88,7 +115,7 @@ class MapViewModel : ViewModel() {
             for (dc:DocumentChange in value?.documentChanges!!){
                 if (dc.type == DocumentChange.Type.ADDED){
                     val newMarker = dc.document.toObject(MarkerSergi::class.java)
-                    newMarker.userId = dc.document.id
+                    newMarker.markerId = dc.document.id
                     newMarker.latitude = dc.document.get("positionLatitude").toString().toDouble()
                     newMarker.longitude = dc.document.get("positionLongitude").toString().toDouble()
                     newMarker.category.name = dc.document.get("categoryName").toString()
@@ -196,21 +223,6 @@ class MapViewModel : ViewModel() {
         return position
     }
 
-    // Añadir marcador a la lista
-    // Método para agregar un nuevo marcador
-    fun addMarker(marker: MarkerSergi) {
-        val currentList = _markers.value.orEmpty().toMutableList()
-        currentList.add(marker)
-        _markers.value = currentList
-    }
-
-    // Método para eliminar un marcador
-    fun removeMarker(marker: MarkerSergi) {
-        val currentList = _markers.value.orEmpty().toMutableList()
-        currentList.remove(marker)
-        _markers.value = currentList
-    }
-
     // LiveData para la lista de marcadores
     private val _editingMarkers = MutableLiveData<MarkerSergi>()
     var editingMarkers: LiveData<MarkerSergi> = _editingMarkers
@@ -255,20 +267,6 @@ class MapViewModel : ViewModel() {
         return _categories.value.orEmpty()
     }
 
-    // Método para agregar una nueva categoría
-    fun addCategory(category: Categoria) {
-        val currentList = _categories.value.orEmpty().toMutableList()
-        currentList.add(category)
-        _categories.value = currentList
-    }
-
-    // Método para eliminar una categoría
-    fun removeCategory(category: Categoria) {
-        val currentList = _categories.value.orEmpty().toMutableList()
-        currentList.remove(category)
-        _categories.value = currentList
-    }
-
     // LiveData para la categoría seleccionada
     private val _selectedCategory = MutableLiveData<Categoria?>()
     val selectedCategory: LiveData<Categoria?> = _selectedCategory
@@ -283,14 +281,10 @@ class MapViewModel : ViewModel() {
         return _markers.value?.filter { it.category.name == category.name } ?: emptyList()
     }
 
-    private var esPerModificar = false
 
-    fun modificarEsPerModificar(boolean: Boolean) {
-        esPerModificar = boolean
-    }
 
-    fun pillarEsPerModificar(): Boolean {
-        return esPerModificar
+    fun deleteMarker(markerId:String){
+        database.collection("markers").document(markerId).delete()
     }
 
     fun uploadImage(imageUri: Uri){
