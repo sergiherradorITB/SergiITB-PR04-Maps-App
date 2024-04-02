@@ -205,7 +205,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                 }
                                 // Filtrar marcadores por categoría seleccionada
                                 val markersToShow = if (selectedCategory != null) {
-                                    mapViewModel.getMarkersByCategory(selectedCategory!!) // si no es nulo filtro por categoria
+                                  mapViewModel.getMarkersByCategory(selectedCategory!!) // si no es nulo filtro por categoria
                                 } else {
                                     marcadores // Si es nulo cojo el valor de marcadores
                                 }

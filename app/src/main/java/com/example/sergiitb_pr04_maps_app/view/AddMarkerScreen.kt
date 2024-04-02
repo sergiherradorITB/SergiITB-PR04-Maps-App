@@ -183,8 +183,6 @@ fun AddMarkerScreen(
                                 if (markerToAdd != null) {
                                     // mapViewModel.addMarker(markerToAdd)
                                     mapViewModel.addMarkerToDatabase(markerToAdd)
-
-                                    // mapViewModel.addExampleToDatabase(Prueba("peru","gilipollas"))
                                 }
                                 onCloseBottomSheet()
                             }

@@ -4,6 +4,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
 class Categoria(
-    val name: String,
+    var name: String,
     val colorResId: Color   // ID de recurso de color
 )

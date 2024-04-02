@@ -2,6 +2,7 @@ package com.example.sergiitb_pr04_maps_app.viewmodel
 
 import android.content.ContentValues.TAG
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -23,13 +24,20 @@ import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MapViewModel : ViewModel() {
     private val title = mutableStateOf("")
     private val snippet = mutableStateOf("")
     private val selectedCategoria = mutableStateOf<Categoria?>(null)
     private val photoBitmap = mutableStateOf<Bitmap?>(null)
+    private val _uriFoto = mutableStateOf<Uri?>(null)
+    var uriFoto = _uriFoto
+
     private val photoTaken = mutableStateOf(false)
     private val showGuapo = mutableStateOf(false)
 
@@ -58,16 +66,17 @@ class MapViewModel : ViewModel() {
                     "positionLongitude" to (marker.longitude),
                     "title" to marker.title,
                     "snippet" to marker.snippet,
-                    // "foto" to marker.photo
+                    "categoryName" to marker.category.name,
                     )
             )
+        uploadImage(uriFoto.value!!)
+        println("URI AAA ${uriFoto.value}")
         println("Hola :( $marker")
+        pillarTodosMarkers() // Solicitar la lista completa de marcadores después de añadir uno nuevo
+
     }
 
     var repository:Repository = Repository()
-
-    private val _cargando = MutableLiveData(true)
-    val cargando = _cargando
 
     fun pillarTodosMarkers(){
         repository.getMarkers().addSnapshotListener{value, error ->
@@ -80,12 +89,16 @@ class MapViewModel : ViewModel() {
                 if (dc.type == DocumentChange.Type.ADDED){
                     val newMarker = dc.document.toObject(MarkerSergi::class.java)
                     newMarker.userId = dc.document.id
+                    newMarker.latitude = dc.document.get("positionLatitude").toString().toDouble()
+                    newMarker.longitude = dc.document.get("positionLongitude").toString().toDouble()
+                    newMarker.category.name = dc.document.get("categoryName").toString()
                     tempList.add(newMarker)
+                    println("Adios :( " + newMarker.category.name)
                 }
+
             }
             _markers.value = tempList
         }
-        // _cargando.value = false
     }
 
     fun setCameraPermissionGranted(granted: Boolean) {
@@ -122,6 +135,10 @@ class MapViewModel : ViewModel() {
 
     fun getSelectedCategory(): Categoria? {
         return selectedCategoria.value
+    }
+
+    fun modifyUriPhoto(newValue: Uri?) {
+        _uriFoto.value = newValue
     }
 
     fun modifyPhotoBitmap(newValue: Bitmap?) {
@@ -263,7 +280,7 @@ class MapViewModel : ViewModel() {
 
     // Método para obtener marcadores por categoría
     fun getMarkersByCategory(category: Categoria): List<MarkerSergi> {
-        return _markers.value?.filter { it.category == category } ?: emptyList()
+        return _markers.value?.filter { it.category.name == category.name } ?: emptyList()
     }
 
     private var esPerModificar = false
@@ -274,5 +291,22 @@ class MapViewModel : ViewModel() {
 
     fun pillarEsPerModificar(): Boolean {
         return esPerModificar
+    }
+
+    fun uploadImage(imageUri: Uri){
+        println("XAVI UWU")
+        val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault())
+        val now = Date()
+        val fileName = formatter.format(now)
+        val storage = FirebaseStorage.getInstance().getReference("images/$fileName")
+        storage.putFile(imageUri)
+            .addOnSuccessListener {
+                Log.i("IMAGE UPLOAD", "Image uploaded successfully")
+                println("Xavi peruano fino")
+            }
+            .addOnFailureListener{
+                Log.i("IMAGE UPLOAD", "Image upload failed")
+                println("Xavi peruano malo")
+            }
     }
 }

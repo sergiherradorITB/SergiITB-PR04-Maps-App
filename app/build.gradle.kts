@@ -96,13 +96,13 @@ dependencies {
 
     // FIREBASE
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
-    // Add the dependency for the Firebase Authentication library
-    // When using the BoM, you don't specify versions in Firebase library dependencies
-    // implementation("com.google.firebase:firebase-auth")
-
-    // Declare the dependency for the Cloud Firestore library
-    // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // STORAGE
+    implementation ("com.google.firebase:firebase-storage-ktx")
+
+    // GLIDE
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
 
 }
 

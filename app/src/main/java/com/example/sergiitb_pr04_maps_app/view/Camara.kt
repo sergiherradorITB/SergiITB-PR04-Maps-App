@@ -135,7 +135,7 @@ fun openAppSettings(activity: Activity) {
 fun TakePhotoScreen(
     navigationController: NavController,
     mapViewModel: MapViewModel,
-    onPhotoCaptured: (Bitmap) -> Unit // Nuevo parámetro
+    onPhotoCaptured: (Bitmap) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -151,6 +151,8 @@ fun TakePhotoScreen(
     val launchImage = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = {
+            val uri = it
+
             bitmap = if (Build.VERSION.SDK_INT < 28) {
                 MediaStore.Images.Media.getBitmap(context.contentResolver, it)
             } else {
@@ -161,6 +163,7 @@ fun TakePhotoScreen(
                     ImageDecoder.decodeBitmap(it1)
                 }!!
             }
+            mapViewModel.modifyUriPhoto(uri)
             // Guardar la imagen en el ViewModel
             bitmap?.let {
                 mapViewModel.modifyPhotoBitmap(it)
@@ -210,7 +213,7 @@ fun TakePhotoScreen(
                     Icon(imageVector = Icons.Default.Photo, contentDescription = "Open gallery")
                 }
                 IconButton(onClick = {
-                    takePhoto(context, controller) { photo ->
+                    takePhoto(context, mapViewModel, controller) { photo ->
                         mapViewModel.modifyPhotoBitmap(photo)
                         mapViewModel.modifyShowGuapo(false)
                         mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
@@ -226,6 +229,7 @@ fun TakePhotoScreen(
 
 fun takePhoto(
     context: Context,
+    mapViewModel: MapViewModel,
     controller: LifecycleCameraController, onPhotoTaken: (Bitmap) -> Unit
 ) {
     controller.takePicture(
