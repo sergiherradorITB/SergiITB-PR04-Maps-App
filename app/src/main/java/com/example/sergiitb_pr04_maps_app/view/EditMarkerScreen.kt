@@ -90,6 +90,7 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                         modificarTitle(mapViewModel.editedTitle)
                         modificarSnippet(mapViewModel.editedSnippet)
                         mapViewModel.editedPhoto?.let { modificarPhoto(it) }
+                        modificarPhotoReference(mapViewModel.pillarUriPhoto())
                         mapViewModel.updateMarker(this) // Pasar el marcador actual después de aplicar los cambios
                     }
                     navigationController.navigate(Routes.ListMarkersScreen.route)

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -53,6 +54,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.example.sergiitb_pr04_maps_app.MyDrawerWithFloatingButton
 import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.Categoria
@@ -201,6 +204,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
 }
 
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun LocationItem(
     marker: MarkerSergi,
@@ -212,27 +216,25 @@ fun LocationItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp)
+            .height(200.dp) // Especifica una altura fija para todas las cajas
     ) {
-        Box {
-            marker.photo?.let {
-                Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = "itb-defaultLogo",
-                    contentScale = ContentScale.FillBounds, // no se si dejarlo pero bueno
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(0.4f) // Ajusta la transparencia de la imagen
-                        .size(250.dp)
-                        //.background(marker.category.colorResId)
-                        .clickable {
-                            // marker.latitude?.let { mapViewModel.changePosition(it) }
-                            navController.navigate(Routes.MapScreen.route)
-                        }
-                )
-            }
+        Box(
+            modifier = Modifier.fillMaxSize() // Modificador para que el contenido ocupe todo el espacio en la caja
+        ) {
+            GlideImage(
+                model = marker.photoReference,
+                contentDescription = "Image from Storage",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.33f)
+
+            )
+
             IconButton(
                 onClick = { /*mapViewModel.removeMarker(marker)*/
                     mapViewModel.setEditingMarkers(marker)
+                    mapViewModel.modificarEditedPhoto(null)
                     navController.navigate(Routes.EditMarker.route)
                 },
                 modifier = Modifier
