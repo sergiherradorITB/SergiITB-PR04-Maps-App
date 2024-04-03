@@ -177,7 +177,8 @@ fun AddMarkerScreen(
                                             mapViewModel.getTitle(),
                                             mapViewModel.getSnippet(),
                                             categoryToAdd,
-                                            it
+                                            it,
+                                            null
                                         )
                                     }
                                 if (markerToAdd != null) {

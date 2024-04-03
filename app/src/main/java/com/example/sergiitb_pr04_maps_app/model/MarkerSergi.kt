@@ -11,9 +11,10 @@ data class MarkerSergi(
     var title:String,
     var snippet:String,
     var category: Categoria,
-    var photo:Bitmap?
+    var photo:Bitmap?,
+    var photoReference:String?
 ){
-    constructor():this(null,0.0,0.0,"","",Categoria("",Color.Black),null)
+    constructor():this(null,0.0,0.0,"","",Categoria("",Color.Black),null,null)
 
     // Método para modificar el título
     fun modificarTitle(newTitle: String) {
@@ -28,6 +29,10 @@ data class MarkerSergi(
     // Método para modificar la foto
     fun modificarPhoto(newPhoto: Bitmap) {
         photo = newPhoto
+    }
+
+    fun modificarPhotoReference(newReference: String) {
+        photoReference = newReference
     }
 }
 

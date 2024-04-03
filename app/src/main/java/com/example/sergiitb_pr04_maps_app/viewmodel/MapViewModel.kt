@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -79,54 +80,16 @@ class MapViewModel : ViewModel() {
 
     private val database = FirebaseFirestore.getInstance()
 
-
     // LiveData para la lista de marcadores
     private val _markers = MutableLiveData<MutableList<MarkerSergi>>()
     val markers: LiveData<MutableList<MarkerSergi>> = _markers
 
 
-    fun addMarkerToDatabase(marker: MarkerSergi) {
-        database.collection("markers")
-            .add(
-                hashMapOf(
-                    "positionLatitude" to (marker.latitude),
-                    "positionLongitude" to (marker.longitude),
-                    "title" to marker.title,
-                    "snippet" to marker.snippet,
-                    "categoryName" to marker.category.name,
-                    )
-            )
-        uploadImage(uriFoto.value!!)
-        println("URI AAA ${uriFoto.value}")
-        println("Hola :( $marker")
-        pillarTodosMarkers() // Solicitar la lista completa de marcadores después de añadir uno nuevo
 
-    }
 
-    var repository:Repository = Repository()
 
-    fun pillarTodosMarkers(){
-        repository.getMarkers().addSnapshotListener{value, error ->
-            if (error != null){
-                Log.e("Firestore error", error.message.toString())
-                return@addSnapshotListener
-            }
-            val tempList = mutableListOf<MarkerSergi>()
-            for (dc:DocumentChange in value?.documentChanges!!){
-                if (dc.type == DocumentChange.Type.ADDED){
-                    val newMarker = dc.document.toObject(MarkerSergi::class.java)
-                    newMarker.markerId = dc.document.id
-                    newMarker.latitude = dc.document.get("positionLatitude").toString().toDouble()
-                    newMarker.longitude = dc.document.get("positionLongitude").toString().toDouble()
-                    newMarker.category.name = dc.document.get("categoryName").toString()
-                    tempList.add(newMarker)
-                    println("Adios :( " + newMarker.category.name)
-                }
+    var repository: Repository = Repository()
 
-            }
-            _markers.value = tempList
-        }
-    }
 
     fun setCameraPermissionGranted(granted: Boolean) {
         _cameraPermissionGranted.value = granted
@@ -282,11 +245,11 @@ class MapViewModel : ViewModel() {
     }
 
 
-    fun deleteMarker(markerId:String){
+    fun deleteMarker(markerId: String) {
         database.collection("markers").document(markerId).delete()
     }
 
-    fun updateMarker(editedMarker:MarkerSergi){
+    fun updateMarker(editedMarker: MarkerSergi) {
         database.collection("markers").document(editedMarker.markerId!!).set(
             hashMapOf(
                 "positionLatitude" to (editedMarker.latitude),
@@ -298,20 +261,79 @@ class MapViewModel : ViewModel() {
         )
     }
 
-    fun uploadImage(imageUri: Uri){
+    fun addMarkerToDatabase(marker: MarkerSergi) {
+        uploadImage(uriFoto.value!!, marker) { downloadUrl ->
+            // Actualizar la referencia de la foto en el marcador con la URL de descarga
+            marker.modificarPhotoReference(downloadUrl)
+
+            // Agregar el marcador a la base de datos con la referencia de la foto actualizada
+            database.collection("markers")
+                .add(
+                    hashMapOf(
+                        "positionLatitude" to marker.latitude,
+                        "positionLongitude" to marker.longitude,
+                        "title" to marker.title,
+                        "snippet" to marker.snippet,
+                        "categoryName" to marker.category.name,
+                        "linkImage" to marker.photoReference
+                    )
+                )
+                .addOnSuccessListener {
+                    println("Marker añadido correctamente a la base de datos")
+                    // Solicitar la lista completa de marcadores después de añadir uno nuevo
+                    pillarTodosMarkers()
+                }
+                .addOnFailureListener { e ->
+                    println("Error al añadir el marker a la base de datos: ${e.message}")
+                }
+        }
+    }
+
+    fun uploadImage(imageUri: Uri, marker: MarkerSergi, onComplete: (String) -> Unit) {
         println("XAVI UWU")
         val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault())
         val now = Date()
         val fileName = formatter.format(now)
         val storage = FirebaseStorage.getInstance().getReference("images/$fileName")
+
         storage.putFile(imageUri)
-            .addOnSuccessListener {
+            .addOnSuccessListener { uploadTask ->
                 Log.i("IMAGE UPLOAD", "Image uploaded successfully")
                 println("Xavi peruano fino")
+                uploadTask.storage.downloadUrl.addOnSuccessListener { uri ->
+                    val downloadUrl = uri.toString()
+                    println("URL de descarga de la imagen: $downloadUrl")
+                    onComplete(downloadUrl) // Llamar al callback con la URL de descarga
+                }
             }
-            .addOnFailureListener{
+            .addOnFailureListener {
                 Log.i("IMAGE UPLOAD", "Image upload failed")
                 println("Xavi peruano malo")
             }
     }
+
+    fun pillarTodosMarkers() {
+        repository.getMarkers().addSnapshotListener { value, error ->
+            if (error != null) {
+                Log.e("Firestore error", error.message.toString())
+                return@addSnapshotListener
+            }
+            val tempList = mutableListOf<MarkerSergi>()
+            for (dc: DocumentChange in value?.documentChanges!!) {
+                if (dc.type == DocumentChange.Type.ADDED) {
+                    val newMarker = dc.document.toObject(MarkerSergi::class.java)
+                    newMarker.markerId = dc.document.id
+                    newMarker.latitude = dc.document.get("positionLatitude").toString().toDouble()
+                    newMarker.longitude = dc.document.get("positionLongitude").toString().toDouble()
+                    newMarker.category.name = dc.document.get("categoryName").toString()
+                    newMarker.photoReference = dc.document.get("linkImage").toString()
+                    tempList.add(newMarker)
+                    println("Adios :( " + newMarker.category.name)
+                }
+
+            }
+            _markers.value = tempList
+        }
+    }
 }
+
