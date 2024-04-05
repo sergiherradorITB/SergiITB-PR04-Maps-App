@@ -182,7 +182,6 @@ fun AddMarkerScreen(
                                         )
                                     }
                                 if (markerToAdd != null) {
-                                    // mapViewModel.addMarker(markerToAdd)
                                     mapViewModel.addMarkerToDatabase(markerToAdd)
                                 }
                                 onCloseBottomSheet()

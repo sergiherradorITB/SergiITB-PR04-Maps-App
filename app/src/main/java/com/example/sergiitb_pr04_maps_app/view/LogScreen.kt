@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
@@ -41,6 +42,7 @@ import com.example.sergiitb_pr04_maps_app.R
 import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 
 @Composable
 fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
@@ -48,10 +50,12 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
 
     val isLoading: Boolean by mapViewModel.isLoading.observeAsState(true)
     val goToNext: Boolean by mapViewModel.goToNext.observeAsState(false)
-    val emailState:String by mapViewModel.emailState.observeAsState("")
-    val passwordState:String by mapViewModel.passwordState.observeAsState("")
-    val showDialogPass:Boolean by mapViewModel.showDialogPass.observeAsState(false)
-    val passwordProblem:Boolean by mapViewModel.passwordProblem.observeAsState(false)
+    val emailState: String by mapViewModel.emailState.observeAsState("")
+    val passwordState: String by mapViewModel.passwordState.observeAsState("")
+    val showDialogPass: Boolean by mapViewModel.showDialogPass.observeAsState(false)
+    val passwordProblem: Boolean by mapViewModel.passwordProblem.observeAsState(false)
+    val showDialogAuth: Boolean by mapViewModel.showDialogAuth.observeAsState(false)
+    val emailProblem: Boolean by mapViewModel.emailDuplicated.observeAsState(false)
 
 
     if (!isLoading) {
@@ -65,7 +69,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                 color = MaterialTheme.colorScheme.secondary
             )
         }
-        if (goToNext){
+        if (goToNext) {
             navController.navigate(Routes.MenuScreen.route)
         }
     } else {
@@ -120,9 +124,10 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                     if (passwordState.length < 6) {
                         mapViewModel.modificarShowDialogPass(true)
                         mapViewModel.modificarPasswordProblem(true)
-                    } else if (emailState.contains("@")){
+                    } else if (emailState.contains("@")) {
                         mapViewModel.login(emailState, passwordState)
                     } else {
+                        mapViewModel.modificarPasswordProblem(false)
                         mapViewModel.modificarShowDialogPass(true)
                     }
                 },
@@ -135,9 +140,10 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                     if (passwordState.length < 6) {
                         mapViewModel.modificarShowDialogPass(true)
                         mapViewModel.modificarPasswordProblem(true)
-                    } else if (emailState.contains("@")){
+                    } else if (emailState.contains("@")) {
                         mapViewModel.register(emailState, passwordState)
                     } else {
+                        mapViewModel.modificarPasswordProblem(false)
                         mapViewModel.modificarShowDialogPass(true)
                     }
                 },
@@ -145,13 +151,22 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
             ) {
                 Text(text = "Register")
             }
-            MyDialogPasswordOrEmail(showDialogPass,passwordProblem) { mapViewModel.modificarShowDialogPass(false) }
         }
+        MyDialogPasswordOrEmail(
+            showDialogPass,
+            passwordProblem
+        ) { mapViewModel.modificarShowDialogPass(false) }
+
+        MyDialogPasswordAuth(
+            showDialogAuth,
+            emailProblem
+        ) { mapViewModel.modificarShowDialogAuth(false) }
     }
 }
 
+
 @Composable
-fun MyDialogPasswordOrEmail(show: Boolean, password:Boolean, onDismiss: () -> Unit) {
+fun MyDialogPasswordOrEmail(show: Boolean, password: Boolean, onDismiss: () -> Unit) {
     if (show) {
         Dialog(onDismissRequest = { onDismiss() }) {
             Column(
@@ -160,10 +175,38 @@ fun MyDialogPasswordOrEmail(show: Boolean, password:Boolean, onDismiss: () -> Un
                     .padding(24.dp)
                     .fillMaxWidth()
             ) {
-                if (password){
+                if (password) {
                     Text(text = "La contraseña debe ser mínimo de 6 caracteres")
-                } else{
+                } else {
                     Text(text = "El email es irróneo, necesitas mínimo el @")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MyDialogPasswordAuth(show: Boolean, emailProblem: Boolean, onDismiss: () -> Unit) {
+    if (show) {
+        Dialog(onDismissRequest = { onDismiss() }) {
+            Column(
+                Modifier
+                    .background(Color.White)
+                    .padding(24.dp)
+                    .fillMaxWidth()
+            ) {
+                if (emailProblem) {
+                    Text(
+                        text = "Email ya registrado!!",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    Text(
+                        text = "Credenciales incorrectas",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }

@@ -16,7 +16,11 @@ import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.model.Repository
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.recaptcha.RecaptchaException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -345,6 +349,10 @@ class MapViewModel : ViewModel() {
 
     private val _userId = MutableLiveData<String>()
     private val _loggedUser = MutableLiveData<String>()
+    val loggedUser = _loggedUser
+    fun pillarLoggedUser():String{
+        return _loggedUser.value.toString()
+    }
 
     private val _isLoading = MutableLiveData<Boolean>(true)
     val isLoading = _isLoading
@@ -380,20 +388,35 @@ class MapViewModel : ViewModel() {
     fun modificarPasswordProblem(value: Boolean) {
         _passwordProblem.value = value
     }
+
     fun modifyProcessing(newValue: Boolean) {
         _isLoading.value = newValue
     }
+
+    private val _showDialogAuth = MutableLiveData<Boolean>()
+    val showDialogAuth: LiveData<Boolean> = _showDialogAuth
+
+    fun modificarShowDialogAuth(value: Boolean) {
+        _showDialogAuth.value = value
+    }
+
+    private val _emailDuplicated = MutableLiveData<Boolean>()
+    val emailDuplicated: LiveData<Boolean> = _emailDuplicated
+
 
     fun register(username: String, password: String) {
         auth.createUserWithEmailAndPassword(username, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     _goToNext.value = true
+                    modifyProcessing(false)
                 } else {
                     _goToNext.value = false
-                    Log.d("Error", "Error creating user : ${task.result}")
+                    Log.d("Error", "Error creating user : ${task.exception}")
+                    modifyProcessing(true)
+                    _emailDuplicated.value = true
+                    _showDialogAuth.value = true
                 }
-                modifyProcessing(false)
             }
     }
 
@@ -404,11 +427,15 @@ class MapViewModel : ViewModel() {
                     _userId.value = task.result.user?.uid
                     _loggedUser.value = task.result.user?.email?.split("@")?.get(0)
                     _goToNext.value = true
+                    modifyProcessing(false)
+
                 } else {
                     _goToNext.value = false
-                    Log.d("Error", "Error signing in: ${task.result}")
+                    Log.d("Error", "Error signing in: ${task.exception}")
+                    modifyProcessing(true)
+                    _emailDuplicated.value = false
+                    _showDialogAuth.value = true
                 }
-                modifyProcessing(false)
             }
     }
 

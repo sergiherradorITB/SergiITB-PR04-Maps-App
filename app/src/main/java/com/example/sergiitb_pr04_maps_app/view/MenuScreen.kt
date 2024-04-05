@@ -6,6 +6,7 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -17,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,6 +41,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MenuScreen(mapViewModel: MapViewModel, navController: NavController) {
+
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         MyDrawer(
             navController,
@@ -46,11 +49,22 @@ fun MenuScreen(mapViewModel: MapViewModel, navController: NavController) {
             content = {
                 Column(
                     modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
                 ) {
-                    Text(text = "Bienvenido al Menú", fontSize = 20.sp)
+                    Text(
+                        text = "Bienvenido al Menú",
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                    Text(
+                        text = "Usuario: ${mapViewModel.pillarLoggedUser()}",
+                        fontSize = 17.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.padding(vertical = 16.dp))
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        Modifier.padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -80,6 +94,7 @@ fun MenuScreen(mapViewModel: MapViewModel, navController: NavController) {
                         }
                     }
                 }
+
             }
         )
     }
