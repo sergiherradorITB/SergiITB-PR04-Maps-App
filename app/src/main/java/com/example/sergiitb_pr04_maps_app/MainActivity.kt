@@ -132,7 +132,7 @@ fun MyDrawerWithFloatingButton(
             }
         }
     }) {
-        MyScaffold(mapViewModel, state, navController,content)
+        MyScaffold(mapViewModel, state, navController, content)
     }
 }
 
@@ -171,11 +171,17 @@ fun MyDrawer(
             ) {
                 screensFromDrawer.forEach { screen ->
                     Button(
-                        modifier = Modifier.fillMaxWidth(0.9f),
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f),
                         shape = RectangleShape,
                         onClick = {
-                            navController.navigate(screen.route)
-                            scope.launch { state.close() }
+                            if (screen.route == "cerrar_sesion") {
+                                // Realizar acciones de cierre de sesión
+                                mapViewModel.signOut(navController)
+                            } else {
+                                navController.navigate(screen.route)
+                                scope.launch { state.close() }
+                            }
                         }
                     ) {
                         Text(text = screen.title)
@@ -244,7 +250,7 @@ fun MyTopAppBar(mapViewModel: MapViewModel, state: DrawerState, navController: N
                 },
             ) {
                 Icon(
-                    imageVector = Icons.Default.Map ,
+                    imageVector = Icons.Default.Map,
                     contentDescription = "Back",
                     //tint = if (listScreenViewModel.pillarGhibliId() != "") Color.White else Color.Black
                 )

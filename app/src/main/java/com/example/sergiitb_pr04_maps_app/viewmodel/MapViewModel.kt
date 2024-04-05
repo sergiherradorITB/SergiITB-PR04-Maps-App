@@ -10,10 +10,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
+import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.model.Repository
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -301,7 +304,7 @@ class MapViewModel : ViewModel() {
                 uploadTask.storage.downloadUrl.addOnSuccessListener { uri ->
                     val downloadUrl = uri.toString()
                     println("URL de descarga de la imagen: $downloadUrl")
-                    onComplete(downloadUrl) // Llamar al callback con la URL de descarga
+                    onComplete(downloadUrl) // Llamar a la funcion que le pasamos, en este caso le pasamos la de añadir marcador a la bbdd
                 }
             }
             .addOnFailureListener {
@@ -332,6 +335,88 @@ class MapViewModel : ViewModel() {
             }
             _markers.value = tempList
         }
+    }
+
+    private val auth = FirebaseAuth.getInstance()
+
+    // LiveData para isLoading
+    private val _goToNext = MutableLiveData<Boolean>()
+    val goToNext = _goToNext
+
+    private val _userId = MutableLiveData<String>()
+    private val _loggedUser = MutableLiveData<String>()
+
+    private val _isLoading = MutableLiveData<Boolean>(true)
+    val isLoading = _isLoading
+
+    // LiveData para emailState
+    private val _emailState = MutableLiveData<String>()
+    val emailState: LiveData<String> = _emailState
+
+    // LiveData para passwordState
+    private val _passwordState = MutableLiveData<String>()
+    val passwordState: LiveData<String> = _passwordState
+
+    // LiveData para showDialog
+    private val _showDialogPass = MutableLiveData<Boolean>()
+    val showDialogPass: LiveData<Boolean> = _showDialogPass
+
+    // LiveData para passwordProblem
+    private val _passwordProblem = MutableLiveData<Boolean>()
+    val passwordProblem: LiveData<Boolean> = _passwordProblem
+
+    fun modificarEmailState(value: String) {
+        _emailState.value = value
+    }
+
+    fun modificarPasswordState(value: String) {
+        _passwordState.value = value
+    }
+
+    fun modificarShowDialogPass(value: Boolean) {
+        _showDialogPass.value = value
+    }
+
+    fun modificarPasswordProblem(value: Boolean) {
+        _passwordProblem.value = value
+    }
+    fun modifyProcessing(newValue: Boolean) {
+        _isLoading.value = newValue
+    }
+
+    fun register(username: String, password: String) {
+        auth.createUserWithEmailAndPassword(username, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _goToNext.value = true
+                } else {
+                    _goToNext.value = false
+                    Log.d("Error", "Error creating user : ${task.result}")
+                }
+                modifyProcessing(false)
+            }
+    }
+
+    fun login(username: String?, password: String?) {
+        auth.signInWithEmailAndPassword(username!!, password!!)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _userId.value = task.result.user?.uid
+                    _loggedUser.value = task.result.user?.email?.split("@")?.get(0)
+                    _goToNext.value = true
+                } else {
+                    _goToNext.value = false
+                    Log.d("Error", "Error signing in: ${task.result}")
+                }
+                modifyProcessing(false)
+            }
+    }
+
+    fun signOut(navController: NavController) {
+        auth.signOut()
+        _goToNext.value = false
+        modifyProcessing(true)
+        navController.navigate(Routes.LogScreen.route)
     }
 }
 
