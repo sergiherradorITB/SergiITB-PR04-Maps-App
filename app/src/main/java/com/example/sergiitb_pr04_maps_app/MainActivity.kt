@@ -176,7 +176,6 @@ fun MyDrawer(
                         shape = RectangleShape,
                         onClick = {
                             if (screen.route == "cerrar_sesion") {
-                                // Realizar acciones de cierre de sesión
                                 mapViewModel.signOut(navController)
                             } else {
                                 navController.navigate(screen.route)
@@ -252,7 +251,6 @@ fun MyTopAppBar(mapViewModel: MapViewModel, state: DrawerState, navController: N
                 Icon(
                     imageVector = Icons.Default.Map,
                     contentDescription = "Back",
-                    //tint = if (listScreenViewModel.pillarGhibliId() != "") Color.White else Color.Black
                 )
             }
         }

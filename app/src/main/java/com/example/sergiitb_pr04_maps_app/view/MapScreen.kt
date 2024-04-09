@@ -36,18 +36,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sergiitb_pr04_maps_app.MainActivity
 import com.example.sergiitb_pr04_maps_app.MyDrawerWithFloatingButton
+import com.example.sergiitb_pr04_maps_app.R
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.ktx.firestore
@@ -70,7 +74,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
     mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
     val marcadores by mapViewModel.markers.observeAsState(emptyList())
     mapViewModel.pillarTodosMarkers()
-
 
     MyDrawerWithFloatingButton(
         navController = navController,
@@ -205,7 +208,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                 }
                                 // Filtrar marcadores por categoría seleccionada
                                 val markersToShow = if (selectedCategory != null) {
-                                  mapViewModel.getMarkersByCategory(selectedCategory!!) // si no es nulo filtro por categoria
+                                    mapViewModel.getMarkersByCategory(selectedCategory!!) // si no es nulo filtro por categoria
                                 } else {
                                     marcadores // Si es nulo cojo el valor de marcadores
                                 }
@@ -220,6 +223,20 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                         ), // no los muestra en la posicion D:
                                         title = marker.title,
                                         snippet = marker.snippet,
+                                        icon = BitmapDescriptorFactory.defaultMarker(
+                                            when (marker.category.name) {
+                                                "Favoritos" -> BitmapDescriptorFactory.HUE_CYAN
+                                                "Likes" -> BitmapDescriptorFactory.HUE_YELLOW
+                                                "Info" -> BitmapDescriptorFactory.HUE_GREEN
+                                                else -> BitmapDescriptorFactory.HUE_RED
+                                            })
+                                            /* SI PONGO YO LAS FOTOS SALEN GIGANTES.fromResource(
+                                            when (marker.category.name) {
+                                                "Favoritos" -> R.drawable.uwu
+                                                "Likes" -> R.drawable.favoritemarker
+                                                "Info" -> R.drawable.informarker
+                                                else -> R.drawable.uwu
+                                            } */
                                     )
                                 }
                             }
