@@ -105,7 +105,8 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                             // mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
                             mapViewModel.modifyExpandedMapa(false)
                             mapViewModel.pillarTodosMarkers()
-                            texto = "Mostrar Todos" // Actualizar el texto al seleccionar la opción "Mostrar Todos"
+                            texto =
+                                "Mostrar Todos" // Actualizar el texto al seleccionar la opción "Mostrar Todos"
                         })
 
                         // Opciones para las categorías
@@ -113,7 +114,8 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                             DropdownMenuItem(text = { Text(text = categoria.name) }, onClick = {
                                 mapViewModel.pillarTodosMarkersCategoria(categoria.name)
                                 mapViewModel.modifyExpandedMapa(false)
-                                texto = categoria.name // Actualizar el texto al seleccionar una categoría
+                                texto =
+                                    categoria.name // Actualizar el texto al seleccionar una categoría
                             })
                         }
                     }
@@ -205,7 +207,15 @@ fun LocationItem(
     mapViewModel: MapViewModel
 ) {
     Card(
-        border = BorderStroke(2.dp, marker.category.colorResId),
+        border = BorderStroke(
+            2.dp,
+            when (marker.category.name) {
+                "Info" -> Color.Green
+                "Likes" -> Color.Yellow
+                "Favoritos" -> Color.Cyan
+                else -> Color.Black
+            }
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(2.dp)

@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -169,6 +170,8 @@ fun MyDrawer(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val context = LocalContext.current
+
                 screensFromDrawer.forEach { screen ->
                     Button(
                         modifier = Modifier
@@ -176,7 +179,7 @@ fun MyDrawer(
                         shape = RectangleShape,
                         onClick = {
                             if (screen.route == "cerrar_sesion") {
-                                mapViewModel.signOut(navController)
+                                mapViewModel.signOut(context,navController)
                             } else {
                                 navController.navigate(screen.route)
                                 scope.launch { state.close() }

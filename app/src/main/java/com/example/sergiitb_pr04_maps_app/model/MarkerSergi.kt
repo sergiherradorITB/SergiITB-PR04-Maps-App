@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 
 
 data class MarkerSergi(
+    var owner:String?,
     var markerId:String?,
     var latitude:Double,
     var longitude:Double,
@@ -14,7 +15,7 @@ data class MarkerSergi(
     var photo:Bitmap?,
     var photoReference:String?
 ){
-    constructor():this(null,0.0,0.0,"","",Categoria("",Color.Black),null,null)
+    constructor():this(null,null,0.0,0.0,"","",Categoria("",Color.Black),null,null)
 
     // Método para modificar el título
     fun modificarTitle(newTitle: String) {

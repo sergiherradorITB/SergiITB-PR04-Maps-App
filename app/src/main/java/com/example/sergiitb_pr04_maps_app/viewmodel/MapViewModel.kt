@@ -1,5 +1,6 @@
 package com.example.sergiitb_pr04_maps_app.viewmodel
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
@@ -7,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,6 +17,7 @@ import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.model.Repository
+import com.example.sergiitb_pr04_maps_app.model.UserPrefs
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.recaptcha.RecaptchaException
 import com.google.firebase.auth.FirebaseAuth
@@ -24,7 +27,10 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -260,6 +266,7 @@ class MapViewModel : ViewModel() {
             database.collection("markers")
                 .add(
                     hashMapOf(
+                        "owner" to marker.owner,
                         "positionLatitude" to marker.latitude,
                         "positionLongitude" to marker.longitude,
                         "title" to marker.title,
@@ -303,7 +310,9 @@ class MapViewModel : ViewModel() {
     }
 
     fun pillarTodosMarkers() {
-        repository.getMarkers().addSnapshotListener { value, error ->
+        repository.getMarkers()
+            .whereEqualTo("owner", _loggedUser.value )
+            .addSnapshotListener { value, error ->
             if (error != null) {
                 Log.e("Firestore error", error.message.toString())
                 return@addSnapshotListener
@@ -328,6 +337,7 @@ class MapViewModel : ViewModel() {
 
     fun pillarTodosMarkersCategoria(categoria: String) {
         repository.getMarkers()
+            .whereEqualTo("owner", _loggedUser.value )
             .whereEqualTo("categoryName", categoria)
             .addSnapshotListener { value, error ->
             if (error != null) {
@@ -415,12 +425,16 @@ class MapViewModel : ViewModel() {
     val emailDuplicated: LiveData<Boolean> = _emailDuplicated
 
 
-    fun register(username: String, password: String) {
+    fun register(context: Context, username: String, password: String) {
+        val userPrefs = UserPrefs(context)
         auth.createUserWithEmailAndPassword(username, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     _goToNext.value = true
                     modifyProcessing(false)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        userPrefs.saveUserData(_emailState.value!!,_passwordState.value!!)
+                    }
                 } else {
                     _goToNext.value = false
                     Log.d("Error", "Error creating user : ${task.exception}")
@@ -429,6 +443,16 @@ class MapViewModel : ViewModel() {
                     _showDialogAuth.value = true
                 }
             }
+    }
+
+    private val _validLogin = MutableLiveData<Boolean>()
+    val validLogin: LiveData<Boolean> = _validLogin
+
+    private val _passwordVisibility = MutableLiveData<Boolean>()
+    val passwordVisibility = _passwordVisibility
+
+    fun cambiarPassVisibility(nuevoBoolean: Boolean){
+        _passwordVisibility.value = nuevoBoolean
     }
 
     fun login(username: String?, password: String?) {
@@ -448,11 +472,23 @@ class MapViewModel : ViewModel() {
                     _showDialogAuth.value = true
                 }
             }
+            .addOnFailureListener { task ->
+                _validLogin.value = false
+            }
     }
 
-    fun signOut(navController: NavController) {
+    fun signOut(context: Context, navController: NavController) {
+
+        val userPrefs = UserPrefs(context)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            userPrefs.deleteUserData()
+        }
+
         auth.signOut()
         _goToNext.value = false
+        _passwordState.value = ""
+
         modifyProcessing(true)
         navController.navigate(Routes.LogScreen.route)
     }

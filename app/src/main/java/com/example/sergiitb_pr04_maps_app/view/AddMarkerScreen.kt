@@ -171,6 +171,7 @@ fun AddMarkerScreen(
                                 val markerToAdd =
                                     photo?.let {
                                         MarkerSergi(
+                                            mapViewModel.pillarLoggedUser(),
                                             null,
                                             latLng.latitude,
                                             latLng.longitude,

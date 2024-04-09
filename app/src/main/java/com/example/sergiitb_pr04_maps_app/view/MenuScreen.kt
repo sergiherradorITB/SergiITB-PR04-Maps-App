@@ -17,6 +17,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -25,15 +26,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.sergiitb_pr04_maps_app.MyDrawer
 import com.example.sergiitb_pr04_maps_app.Routes
+import com.example.sergiitb_pr04_maps_app.model.UserPrefs
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
@@ -84,9 +89,11 @@ fun MenuScreen(mapViewModel: MapViewModel, navController: NavController) {
                         ) {
                             Text(text = "Listar marcadores")
                         }
+                        val context = LocalContext.current
+
                         Button(
                             onClick = {
-                                mapViewModel.signOut(navController)
+                                mapViewModel.signOut(context,navController)
                             },
                             modifier = Modifier.padding(vertical = 8.dp)
                         ) {
