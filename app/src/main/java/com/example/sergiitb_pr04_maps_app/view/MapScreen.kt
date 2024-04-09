@@ -71,7 +71,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
-    mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
     val marcadores by mapViewModel.markers.observeAsState(emptyList())
     mapViewModel.pillarTodosMarkers()
 
@@ -114,9 +113,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                         val categories: List<Categoria> by mapViewModel.categories.observeAsState(
                             emptyList()
                         )
-                        val selectedCategory by mapViewModel.selectedCategory.observeAsState(
-                            null
-                        )
 
                         var texto by remember { mutableStateOf("Selecciona que quieres mostrar") }
 
@@ -143,8 +139,9 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                 DropdownMenuItem(
                                     text = { Text(text = "Mostrar Todos") },
                                     onClick = {
-                                        mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
+                                        // mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
                                         mapViewModel.modifyExpandedMapa(false)
+                                        mapViewModel.pillarTodosMarkers()
                                         texto =
                                             "Mostrar Todos" // Actualizar el texto al seleccionar la opción "Mostrar Todos"
                                     })
@@ -154,7 +151,8 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                     DropdownMenuItem(
                                         text = { Text(text = categoria.name) },
                                         onClick = {
-                                            mapViewModel.setSelectedCategory(categoria)
+                                            // mapViewModel.setSelectedCategory(categoria)
+                                            mapViewModel.pillarTodosMarkersCategoria(categoria.name)
                                             mapViewModel.modifyExpandedMapa(false)
                                             texto =
                                                 categoria.name // Actualizar el texto al seleccionar una categoría
@@ -206,14 +204,8 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                         )
                                     }
                                 }
-                                // Filtrar marcadores por categoría seleccionada
-                                val markersToShow = if (selectedCategory != null) {
-                                    mapViewModel.getMarkersByCategory(selectedCategory!!) // si no es nulo filtro por categoria
-                                } else {
-                                    marcadores // Si es nulo cojo el valor de marcadores
-                                }
 
-                                markersToShow.forEach { marker ->
+                                marcadores.forEach { marker ->
                                     Marker(
                                         state = MarkerState(
                                             LatLng(

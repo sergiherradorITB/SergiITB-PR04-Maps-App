@@ -70,7 +70,6 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
     val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
     var texto by remember { mutableStateOf("Mostrar Todos") }
     val marcadores by mapViewModel.markers.observeAsState(emptyList())
-    val selectedCategory by mapViewModel.selectedCategory.observeAsState(null)
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -100,20 +99,21 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                             .align(Alignment.TopStart)
                     ) {
                         // Opción para mostrar todos los marcadores
-                        DropdownMenuItem(text = { Text(text = "Mostrar Todos") }, onClick = {
-                            mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
+                        DropdownMenuItem(text = {
+                            Text(text = "Mostrar Todos")
+                        }, onClick = {
+                            // mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
                             mapViewModel.modifyExpandedMapa(false)
-                            texto =
-                                "Mostrar Todos" // Actualizar el texto al seleccionar la opción "Mostrar Todos"
+                            mapViewModel.pillarTodosMarkers()
+                            texto = "Mostrar Todos" // Actualizar el texto al seleccionar la opción "Mostrar Todos"
                         })
 
                         // Opciones para las categorías
                         categories.forEach { categoria ->
                             DropdownMenuItem(text = { Text(text = categoria.name) }, onClick = {
-                                mapViewModel.setSelectedCategory(categoria)
+                                mapViewModel.pillarTodosMarkersCategoria(categoria.name)
                                 mapViewModel.modifyExpandedMapa(false)
-                                texto =
-                                    categoria.name // Actualizar el texto al seleccionar una categoría
+                                texto = categoria.name // Actualizar el texto al seleccionar una categoría
                             })
                         }
                     }
@@ -151,14 +151,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                             .fillMaxWidth()
                             .weight(1f)
                     ) {
-
-                        val markersToShow = if (selectedCategory != null) {
-                            mapViewModel.getMarkersByCategory(selectedCategory!!) // si no es nulo filtro por categoria
-                        } else {
-                            marcadores // Si es nulo cojo el valor de marcadores
-                        }
-
-                        items(markersToShow) { marker ->
+                        items(marcadores) { marker ->
                             LocationItem(marker, navController, mapViewModel)
                         }
                     }

@@ -108,6 +108,9 @@ dependencies {
     // AUTH
     implementation ("com.firebaseui:firebase-ui-auth:7.2.0")
 
+    // Datastore
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
 }
 
 secrets {

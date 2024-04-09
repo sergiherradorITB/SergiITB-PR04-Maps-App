@@ -219,21 +219,6 @@ class MapViewModel : ViewModel() {
         return _categories.value.orEmpty()
     }
 
-    // LiveData para la categoría seleccionada
-    private val _selectedCategory = MutableLiveData<Categoria?>()
-    val selectedCategory: LiveData<Categoria?> = _selectedCategory
-
-    // Método para establecer la categoría seleccionada
-    fun setSelectedCategory(category: Categoria?) {
-        _selectedCategory.value = category
-    }
-
-    // Método para obtener marcadores por categoría
-    fun getMarkersByCategory(category: Categoria): List<MarkerSergi> {
-        return _markers.value?.filter { it.category.name == category.name } ?: emptyList()
-    }
-
-
     fun deleteMarker(markerId: String) {
         database.collection("markers").document(markerId).delete()
     }
@@ -319,6 +304,32 @@ class MapViewModel : ViewModel() {
 
     fun pillarTodosMarkers() {
         repository.getMarkers().addSnapshotListener { value, error ->
+            if (error != null) {
+                Log.e("Firestore error", error.message.toString())
+                return@addSnapshotListener
+            }
+            val tempList = mutableListOf<MarkerSergi>()
+            for (dc: DocumentChange in value?.documentChanges!!) {
+                if (dc.type == DocumentChange.Type.ADDED) {
+                    val newMarker = dc.document.toObject(MarkerSergi::class.java)
+                    newMarker.markerId = dc.document.id
+                    newMarker.latitude = dc.document.get("positionLatitude").toString().toDouble()
+                    newMarker.longitude = dc.document.get("positionLongitude").toString().toDouble()
+                    newMarker.category.name = dc.document.get("categoryName").toString()
+                    newMarker.photoReference = dc.document.get("linkImage").toString()
+                    tempList.add(newMarker)
+                    println("Adios :( " + newMarker.category.name)
+                }
+
+            }
+            _markers.value = tempList
+        }
+    }
+
+    fun pillarTodosMarkersCategoria(categoria: String) {
+        repository.getMarkers()
+            .whereEqualTo("categoryName", categoria)
+            .addSnapshotListener { value, error ->
             if (error != null) {
                 Log.e("Firestore error", error.message.toString())
                 return@addSnapshotListener
