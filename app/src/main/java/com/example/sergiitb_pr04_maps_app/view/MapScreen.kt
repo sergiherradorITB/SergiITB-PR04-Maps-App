@@ -42,7 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sergiitb_pr04_maps_app.MainActivity
-import com.example.sergiitb_pr04_maps_app.MyDrawerWithFloatingButton
+import com.example.sergiitb_pr04_maps_app.MyDrawer
 import com.example.sergiitb_pr04_maps_app.R
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
@@ -74,7 +74,11 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
     val marcadores by mapViewModel.markers.observeAsState(emptyList())
     mapViewModel.pillarTodosMarkers()
 
-    MyDrawerWithFloatingButton(
+    if (!mapViewModel.userLogged()){
+        mapViewModel.signOut(context = LocalContext.current, navController)
+    }
+
+    MyDrawer(
         navController = navController,
         mapViewModel = mapViewModel,
         content = {
@@ -232,13 +236,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                     )
                                 }
                             }
-
-                            ExtendedFloatingActionButton(
-                                text = { Text("Show bottom sheet") },
-                                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                                onClick = { showBottomSheet = true },
-                                modifier = Modifier.padding(16.dp)
-                            )
                         }
 
 

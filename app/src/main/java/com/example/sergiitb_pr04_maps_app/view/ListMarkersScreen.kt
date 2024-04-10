@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.example.sergiitb_pr04_maps_app.MyDrawerWithFloatingButton
+import com.example.sergiitb_pr04_maps_app.MyDrawer
 import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
@@ -76,7 +76,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
 
     mapViewModel.pillarTodosMarkers()
 
-    MyDrawerWithFloatingButton(navController = navController, mapViewModel = mapViewModel) {
+    MyDrawer(navController = navController, mapViewModel = mapViewModel) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // DropdownMenu para las opciones de filtrado
