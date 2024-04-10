@@ -238,6 +238,7 @@ class MapViewModel : ViewModel() {
             database.collection("markers").document(editedMarker.markerId!!)
                 .set(
                     hashMapOf(
+                        "owner" to _loggedUser.value,
                         "positionLatitude" to editedMarker.latitude,
                         "positionLongitude" to editedMarker.longitude,
                         "title" to editedMarker.title,
@@ -266,7 +267,7 @@ class MapViewModel : ViewModel() {
             database.collection("markers")
                 .add(
                     hashMapOf(
-                        "owner" to marker.owner,
+                        "owner" to _loggedUser.value,
                         "positionLatitude" to marker.latitude,
                         "positionLongitude" to marker.longitude,
                         "title" to marker.title,
@@ -309,60 +310,96 @@ class MapViewModel : ViewModel() {
             }
     }
 
+    fun uploadImage(imageUri: Uri, onComplete: (String) -> Unit) {
+        println("XAVI UWU")
+        val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault())
+        val now = Date()
+        val fileName = formatter.format(now)
+        val storage = FirebaseStorage.getInstance().getReference("images/$fileName")
+
+        storage.putFile(imageUri)
+            .addOnSuccessListener { uploadTask ->
+                Log.i("IMAGE UPLOAD", "Image uploaded successfully")
+                println("Xavi peruano fino")
+                uploadTask.storage.downloadUrl.addOnSuccessListener { uri ->
+                    val downloadUrl = uri.toString()
+                    println("URL de descarga de la imagen: $downloadUrl")
+                    onComplete(downloadUrl) // Llamar a la funcion que le pasamos, en este caso le pasamos la de añadir marcador a la bbdd
+                }
+            }
+            .addOnFailureListener {
+                Log.i("IMAGE UPLOAD", "Image upload failed")
+                println("Xavi peruano malo")
+            }
+    }
+
     fun pillarTodosMarkers() {
         repository.getMarkers()
-            .whereEqualTo("owner", _loggedUser.value )
+            .whereEqualTo("owner", _loggedUser.value)
             .addSnapshotListener { value, error ->
-            if (error != null) {
-                Log.e("Firestore error", error.message.toString())
-                return@addSnapshotListener
-            }
-            val tempList = mutableListOf<MarkerSergi>()
-            for (dc: DocumentChange in value?.documentChanges!!) {
-                if (dc.type == DocumentChange.Type.ADDED) {
-                    val newMarker = dc.document.toObject(MarkerSergi::class.java)
-                    newMarker.markerId = dc.document.id
-                    newMarker.latitude = dc.document.get("positionLatitude").toString().toDouble()
-                    newMarker.longitude = dc.document.get("positionLongitude").toString().toDouble()
-                    newMarker.category.name = dc.document.get("categoryName").toString()
-                    newMarker.photoReference = dc.document.get("linkImage").toString()
-                    tempList.add(newMarker)
-                    println("Adios :( " + newMarker.category.name)
+                if (error != null) {
+                    Log.e("Firestore error", error.message.toString())
+                    return@addSnapshotListener
                 }
+                val tempList = mutableListOf<MarkerSergi>()
+                for (dc: DocumentChange in value?.documentChanges!!) {
+                    if (dc.type == DocumentChange.Type.ADDED) {
+                        val newMarker = dc.document.toObject(MarkerSergi::class.java)
+                        newMarker.markerId = dc.document.id
+                        newMarker.latitude =
+                            dc.document.get("positionLatitude").toString().toDouble()
+                        newMarker.longitude =
+                            dc.document.get("positionLongitude").toString().toDouble()
+                        newMarker.category.name = dc.document.get("categoryName").toString()
+                        newMarker.photoReference = dc.document.get("linkImage").toString()
+                        tempList.add(newMarker)
+                        println("Adios :( " + newMarker.category.name)
+                    }
 
+                }
+                _markers.value = tempList
             }
-            _markers.value = tempList
-        }
     }
 
     fun pillarTodosMarkersCategoria(categoria: String) {
         repository.getMarkers()
-            .whereEqualTo("owner", _loggedUser.value )
+            .whereEqualTo("owner", _loggedUser.value)
             .whereEqualTo("categoryName", categoria)
             .addSnapshotListener { value, error ->
-            if (error != null) {
-                Log.e("Firestore error", error.message.toString())
-                return@addSnapshotListener
-            }
-            val tempList = mutableListOf<MarkerSergi>()
-            for (dc: DocumentChange in value?.documentChanges!!) {
-                if (dc.type == DocumentChange.Type.ADDED) {
-                    val newMarker = dc.document.toObject(MarkerSergi::class.java)
-                    newMarker.markerId = dc.document.id
-                    newMarker.latitude = dc.document.get("positionLatitude").toString().toDouble()
-                    newMarker.longitude = dc.document.get("positionLongitude").toString().toDouble()
-                    newMarker.category.name = dc.document.get("categoryName").toString()
-                    newMarker.photoReference = dc.document.get("linkImage").toString()
-                    tempList.add(newMarker)
-                    println("Adios :( " + newMarker.category.name)
+                if (error != null) {
+                    Log.e("Firestore error", error.message.toString())
+                    return@addSnapshotListener
                 }
+                val tempList = mutableListOf<MarkerSergi>()
+                for (dc: DocumentChange in value?.documentChanges!!) {
+                    if (dc.type == DocumentChange.Type.ADDED) {
+                        val newMarker = dc.document.toObject(MarkerSergi::class.java)
+                        newMarker.markerId = dc.document.id
+                        newMarker.latitude =
+                            dc.document.get("positionLatitude").toString().toDouble()
+                        newMarker.longitude =
+                            dc.document.get("positionLongitude").toString().toDouble()
+                        newMarker.category.name = dc.document.get("categoryName").toString()
+                        newMarker.photoReference = dc.document.get("linkImage").toString()
+                        tempList.add(newMarker)
+                        println("Adios :( " + newMarker.category.name)
+                    }
 
+                }
+                _markers.value = tempList
             }
-            _markers.value = tempList
-        }
     }
 
     private val auth = FirebaseAuth.getInstance()
+
+    fun userLogged(): Boolean {
+        val resultat: Boolean = if (auth.currentUser == null) {
+            false
+        } else {
+            true
+        }
+        return resultat
+    }
 
     // LiveData para isLoading
     private val _goToNext = MutableLiveData<Boolean>()
@@ -371,7 +408,7 @@ class MapViewModel : ViewModel() {
     private val _userId = MutableLiveData<String>()
     private val _loggedUser = MutableLiveData<String>()
     val loggedUser = _loggedUser
-    fun pillarLoggedUser():String{
+    fun pillarLoggedUser(): String {
         return _loggedUser.value.toString()
     }
 
@@ -433,8 +470,22 @@ class MapViewModel : ViewModel() {
                     _goToNext.value = true
                     modifyProcessing(false)
                     CoroutineScope(Dispatchers.IO).launch {
-                        userPrefs.saveUserData(_emailState.value!!,_passwordState.value!!)
+                        userPrefs.saveUserData(_emailState.value!!, _passwordState.value!!)
                     }
+                    val userRef =
+                        database.collection("user").whereEqualTo("owner", _loggedUser.value)
+                    userRef.get()
+                        .addOnSuccessListener { documents ->
+                            if (documents.isEmpty) {
+                                // Si no hay documentos para este usuario, agregar uno nuevo
+                                database.collection("user")
+                                    .add(
+                                        hashMapOf(
+                                            "owner" to _loggedUser.value,
+                                        )
+                                    )
+                            }
+                        }
                 } else {
                     _goToNext.value = false
                     Log.d("Error", "Error creating user : ${task.exception}")
@@ -451,19 +502,35 @@ class MapViewModel : ViewModel() {
     private val _passwordVisibility = MutableLiveData<Boolean>()
     val passwordVisibility = _passwordVisibility
 
-    fun cambiarPassVisibility(nuevoBoolean: Boolean){
+    fun cambiarPassVisibility(nuevoBoolean: Boolean) {
         _passwordVisibility.value = nuevoBoolean
     }
+
 
     fun login(username: String?, password: String?) {
         auth.signInWithEmailAndPassword(username!!, password!!)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     _userId.value = task.result.user?.uid
-                    _loggedUser.value = task.result.user?.email?.split("@")?.get(0)
+                    _loggedUser.value = task.result.user?.email?.toString()
                     _goToNext.value = true
                     modifyProcessing(false)
-
+                    // Agregar el marcador a la base de datos con la referencia de la foto actualizada
+                    // Verificar si el usuario ya tiene un documento en la colección "user"
+                    val userRef =
+                        database.collection("user").whereEqualTo("owner", _loggedUser.value)
+                    userRef.get()
+                        .addOnSuccessListener { documents ->
+                            if (documents.isEmpty) {
+                                // Si no hay documentos para este usuario, agregar uno nuevo
+                                database.collection("user")
+                                    .add(
+                                        hashMapOf(
+                                            "owner" to _loggedUser.value,
+                                        )
+                                    )
+                            }
+                        }
                 } else {
                     _goToNext.value = false
                     Log.d("Error", "Error signing in: ${task.exception}")
@@ -486,11 +553,67 @@ class MapViewModel : ViewModel() {
         }
 
         auth.signOut()
+
         _goToNext.value = false
         _passwordState.value = ""
 
         modifyProcessing(true)
         navController.navigate(Routes.LogScreen.route)
     }
+
+
+    private val _imageUrlForUser = MutableLiveData<String>()
+    val imageUrlForUser = _imageUrlForUser
+
+    fun getProfileImageUrlForUser() {
+        repository.getUserImageUri()
+            .whereEqualTo("owner", _loggedUser.value)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    Log.e("Firestore error", error.message.toString())
+                    return@addSnapshotListener
+                }
+
+                var tempString: String = "https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1"
+
+                if (value != null) {
+                    for (dc: DocumentChange in value.documentChanges) {
+                        if (dc.type == DocumentChange.Type.ADDED) {
+                            tempString = dc.document.getString("image") ?: tempString
+                            println("Un peruano encontrado")
+                            println(tempString)
+                        }
+                    }
+                }
+
+                _imageUrlForUser.value = tempString
+            }
+    }
+
+    fun updateUser() {
+        uploadImage(uriFoto.value!!) { downloadUrl ->
+            // Realizar una consulta para encontrar el documento del usuario
+            database.collection("user")
+                .whereEqualTo("owner", _loggedUser.value)
+                .get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        // Actualizar el documento con la nueva información
+                        val data = mutableMapOf<String, Any>("image" to downloadUrl)
+                        document.reference.update(data)
+                            .addOnSuccessListener {
+                                println("Usuario actualizado correctamente en la base de datos")
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error al actualizar el usuario en la base de datos: ${e.message}")
+                            }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    println("Error al consultar la base de datos: ${exception.message}")
+                }
+        }
+    }
+
 }
 

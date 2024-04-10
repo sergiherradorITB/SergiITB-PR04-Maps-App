@@ -34,6 +34,7 @@ import com.example.sergiitb_pr04_maps_app.MyDrawer
 import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.UserPrefs
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -41,7 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
+// No tiene sentido usarlo ya que tenemos el drawer
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -52,6 +53,10 @@ fun MenuScreen(mapViewModel: MapViewModel, navController: NavController) {
             navController,
             mapViewModel = mapViewModel,
             content = {
+                if (!mapViewModel.userLogged()){
+                    mapViewModel.signOut(context = LocalContext.current, navController)
+                }
+
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -63,7 +68,7 @@ fun MenuScreen(mapViewModel: MapViewModel, navController: NavController) {
                         modifier = Modifier.padding(top = 16.dp)
                     )
                     Text(
-                        text = "Usuario: ${mapViewModel.pillarLoggedUser()}",
+                        text = "Usuario: ${mapViewModel.pillarLoggedUser().split("@")[0]}",
                         fontSize = 17.sp,
                         modifier = Modifier.padding(top = 8.dp)
                     )

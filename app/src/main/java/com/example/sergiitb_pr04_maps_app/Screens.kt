@@ -7,6 +7,8 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonPin
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screens(val route: String, val title: String) {
@@ -16,17 +18,20 @@ sealed class Screens(val route: String, val title: String) {
         val icon: ImageVector,
         title: String
     ) : Screens(route, title) {
-        object Home : DrawerScreens(Routes.MenuScreen.route, Icons.Filled.Home, "Home")
+        //object Home : DrawerScreens(Routes.MenuScreen.route, Icons.Filled.Home, "Home")
         object Mapa : DrawerScreens(Routes.MapScreen.route, Icons.Filled.Home, "Mapa")
         object Listar : DrawerScreens(Routes.ListMarkersScreen.route, Icons.Filled.List, "Listar marcadores")
         object CerrarSesion : DrawerScreens("cerrar_sesion", Icons.Filled.Close, "Cerrar Sesión")
+
+        object ProfileScreen : DrawerScreens(Routes.ProfileScreen.route, Icons.Filled.PersonPin, "Ver detalles usuario")
 
     }
 }
 
 val screensFromDrawer = listOf(
-    Screens.DrawerScreens.Home,
+    //Screens.DrawerScreens.Home,
     Screens.DrawerScreens.Mapa,
     Screens.DrawerScreens.Listar,
-    Screens.DrawerScreens.CerrarSesion
+    Screens.DrawerScreens.CerrarSesion,
+    Screens.DrawerScreens.ProfileScreen
 )

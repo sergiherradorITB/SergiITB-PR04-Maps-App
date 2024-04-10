@@ -10,4 +10,8 @@ class Repository {
         return database.collection("markers")
     }
 
+    fun getUserImageUri():CollectionReference{
+        return database.collection("user")
+    }
+
 }

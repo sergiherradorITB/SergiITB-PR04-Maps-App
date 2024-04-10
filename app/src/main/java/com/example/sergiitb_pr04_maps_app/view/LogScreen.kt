@@ -85,7 +85,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
         mapViewModel.modifyProcessing(false)
         mapViewModel.login(storedUserData.value[0], storedUserData.value[1])
         if (goToNext) {
-            navController.navigate(Routes.MenuScreen.route)
+            navController.navigate(Routes.MapScreen.route)
         }
     }
 
@@ -101,7 +101,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
             )
         }
         if (goToNext) {
-            navController.navigate(Routes.MenuScreen.route)
+            navController.navigate(Routes.MapScreen.route)
         }
     } else {
         Column(
