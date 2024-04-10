@@ -143,7 +143,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                 DropdownMenuItem(
                                     text = { Text(text = "Mostrar Todos") },
                                     onClick = {
-                                        // mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
                                         mapViewModel.modifyExpandedMapa(false)
                                         mapViewModel.pillarTodosMarkers()
                                         texto =
@@ -155,7 +154,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                     DropdownMenuItem(
                                         text = { Text(text = categoria.name) },
                                         onClick = {
-                                            // mapViewModel.setSelectedCategory(categoria)
                                             mapViewModel.pillarTodosMarkersCategoria(categoria.name)
                                             mapViewModel.modifyExpandedMapa(false)
                                             texto =
@@ -237,8 +235,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                 }
                             }
                         }
-
-
                     }
                     Button(
                         onClick = {
@@ -258,7 +254,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                 PermissionDeclinedScreenMap()
             }
         })
-
 }
 
 @Composable

@@ -11,6 +11,7 @@ import android.os.Build
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -144,35 +145,44 @@ fun TakePhotoScreen(
             CameraController.IMAGE_CAPTURE
         }
     }
-    val img: Bitmap? =
-        ContextCompat.getDrawable(context, R.drawable.itb_bitmap)?.toBitmap()
+    val img: Bitmap? = ContextCompat.getDrawable(context, R.drawable.itb_bitmap)?.toBitmap()
     var bitmap by remember { mutableStateOf(img) }
 
     val launchImage = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = {
-            val uri = it
+            try {
+                val uri = it
 
-            bitmap = if (Build.VERSION.SDK_INT < 28) {
-                MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-            } else {
-                val source = it?.let { it1 ->
-                    ImageDecoder.createSource(context.contentResolver, it1)
+                bitmap = if (Build.VERSION.SDK_INT < 28) {
+                    MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+                } else {
+                    val source = it?.let { it1 ->
+                        ImageDecoder.createSource(context.contentResolver, it1)
+                    }
+                    source?.let { it1 ->
+                        ImageDecoder.decodeBitmap(it1)
+                    }!!
                 }
-                source?.let { it1 ->
-                    ImageDecoder.decodeBitmap(it1)
-                }!!
+                mapViewModel.modifyUriPhoto(uri)
+                // Guardar la imagen en el ViewModel
+                bitmap?.let {
+                    mapViewModel.modifyPhotoBitmap(it)
+                    onPhotoCaptured(it) // Llamar a la función onPhotoCaptured
+                }
+                // mapViewModel.modifyShowGuapo(false)
+                mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
+            } catch (e: NullPointerException) {
+                // Manejar el caso donde no se selecciona una imagen
+                Toast.makeText(context, "No se seleccionó ninguna imagen", Toast.LENGTH_SHORT).show()
+                mapViewModel.modifyShowGuapo(false);println("ERRORAZO");println(e.stackTrace);println(e.message)
+            } catch (e:Exception){
+                // Manejar el caso donde no se selecciona una imagen
+                Toast.makeText(context, "Error no controlado", Toast.LENGTH_SHORT).show()
+                mapViewModel.modifyShowGuapo(false);println("ERRORAZO");println(e.stackTrace);println(e.message)
             }
-            mapViewModel.modifyUriPhoto(uri)
-            // Guardar la imagen en el ViewModel
-            bitmap?.let {
-                mapViewModel.modifyPhotoBitmap(it)
-                onPhotoCaptured(it) // Llamar a la función onPhotoCaptured
-            }
-            // mapViewModel.modifyShowGuapo(false)
-            mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
-        }
-    )
+        })
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         CameraPreview(controller = controller, modifier = Modifier.fillMaxSize())

@@ -616,4 +616,3 @@ class MapViewModel : ViewModel() {
     }
 
 }
-
