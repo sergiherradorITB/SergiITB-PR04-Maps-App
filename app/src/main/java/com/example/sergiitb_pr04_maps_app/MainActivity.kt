@@ -118,13 +118,20 @@ fun MyDrawerWithFloatingButton(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val context = LocalContext.current
+
                 screensFromDrawer.forEach { screen ->
                     Button(
-                        modifier = Modifier.fillMaxWidth(0.9f),
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f),
                         shape = RectangleShape,
                         onClick = {
-                            navController.navigate(screen.route)
-                            scope.launch { state.close() }
+                            if (screen.route == "cerrar_sesion") {
+                                mapViewModel.signOut(context,navController)
+                            } else {
+                                navController.navigate(screen.route)
+                                scope.launch { state.close() }
+                            }
                         }
                     ) {
                         Text(text = screen.title)
