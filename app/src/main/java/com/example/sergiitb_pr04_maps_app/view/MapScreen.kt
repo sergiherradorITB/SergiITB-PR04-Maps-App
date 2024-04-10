@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -186,6 +187,8 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                             {
                                 if (showBottomSheet) {
                                     ModalBottomSheet(
+                                        // tonalElevation =  BottomSheetDefaults.SheetPeekHeight,
+                                        // modifier = Modifier.fillMaxSize(),
                                         onDismissRequest = {
                                             showBottomSheet = false
                                         },

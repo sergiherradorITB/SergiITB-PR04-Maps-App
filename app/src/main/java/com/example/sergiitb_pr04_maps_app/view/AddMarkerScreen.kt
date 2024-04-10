@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -56,7 +57,7 @@ fun AddMarkerScreen(
     val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
     val permissionState =
         rememberPermissionState(permission = Manifest.permission.CAMERA)
-    Column(Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxHeight(1f)) {
 
         LaunchedEffect(Unit) {
             permissionState.launchPermissionRequest()
