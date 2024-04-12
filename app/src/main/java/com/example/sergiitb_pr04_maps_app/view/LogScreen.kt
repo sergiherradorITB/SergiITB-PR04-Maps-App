@@ -166,7 +166,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
 
             Row(Modifier.wrapContentSize()) {
                 Text(
-                    text = "Permanecer loggeado :",
+                    text = "Permanecer conectado :",
                     Modifier.align(CenterVertically),
                     color = Color.Black // Color del texto
                 )
