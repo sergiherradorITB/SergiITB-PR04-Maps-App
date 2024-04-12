@@ -35,4 +35,8 @@ data class MarkerSergi(
     fun modificarPhotoReference(newReference: String) {
         photoReference = newReference
     }
+
+    fun modificarCategoria(newReference: String) {
+        category.name = newReference
+    }
 }

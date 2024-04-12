@@ -154,7 +154,9 @@ fun MyDrawer(
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = "User :  ${mapViewModel.loggedUser.value!!.split("@")[0]}", fontSize = 20.sp, modifier = Modifier.padding(bottom = 10.dp))
+                if (mapViewModel.loggedUser.value != null){
+                    Text(text = "User :  ${mapViewModel.loggedUser.value!!.split("@")[0]}", fontSize = 20.sp, modifier = Modifier.padding(bottom = 10.dp))
+                }
                 Box(
                     modifier = Modifier
                         .padding(top = 10.dp)

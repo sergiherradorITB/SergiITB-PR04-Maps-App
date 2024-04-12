@@ -43,6 +43,9 @@ class MapViewModel : ViewModel() {
     var editedSnippet by mutableStateOf("")
         private set
 
+    var editedCategoryName by mutableStateOf("")
+        private set
+
     var editedPhoto by mutableStateOf<Bitmap?>(null)
         private set
 
@@ -62,6 +65,10 @@ class MapViewModel : ViewModel() {
 
     fun modificarEditedPhoto(photo: Bitmap?) {
         editedPhoto = photo
+    }
+
+    fun modificarCategoryName(categoryName: String) {
+        editedCategoryName = categoryName
     }
 
     fun modificarShowTakePhotoScreen(value: Boolean) {
@@ -209,6 +216,12 @@ class MapViewModel : ViewModel() {
     private val _categories = MutableLiveData<MutableList<Categoria>>()
     val categories: LiveData<MutableList<Categoria>> = _categories
 
+    private val _textoDropDown = MutableLiveData<String>()
+    val textoDropdown: LiveData<String> = _textoDropDown
+
+    fun modificarTextoDropdown(nuevoTexto:String){
+        _textoDropDown.value = nuevoTexto
+    }
     init {
         // Inicializar la lista de categorías si es necesario
         if (_categories.value == null) {
@@ -230,10 +243,35 @@ class MapViewModel : ViewModel() {
     }
 
     fun updateMarker(editedMarker: MarkerSergi) {
-        uploadImage(uriFoto.value!!, editedMarker) { downloadUrl ->
+        if (uriFoto.value != null) {
+            uploadImage(uriFoto.value!!, editedMarker) { downloadUrl ->
             // Actualizar la referencia de la foto en el marcador con la URL de descarga
             editedMarker.modificarPhotoReference(downloadUrl)
 
+            // Agregar el marcador a la base de datos con la referencia de la foto actualizada
+            database.collection("markers").document(editedMarker.markerId!!)
+                .set(
+                    hashMapOf(
+                        "owner" to _loggedUser.value,
+                        "positionLatitude" to editedMarker.latitude,
+                        "positionLongitude" to editedMarker.longitude,
+                        "title" to editedMarker.title,
+                        "snippet" to editedMarker.snippet,
+                        "categoryName" to editedMarker.category.name,
+                        "linkImage" to editedMarker.photoReference
+                    )
+                )
+                .addOnSuccessListener {
+                    println("Marker añadido correctamente a la base de datos")
+                    // Solicitar la lista completa de marcadores después de añadir uno nuevo
+                    pillarTodosMarkers()
+                }
+                .addOnFailureListener { e ->
+                    println("Error al añadir el marker a la base de datos: ${e.message}")
+                }
+
+            }
+        } else {
             // Agregar el marcador a la base de datos con la referencia de la foto actualizada
             database.collection("markers").document(editedMarker.markerId!!)
                 .set(

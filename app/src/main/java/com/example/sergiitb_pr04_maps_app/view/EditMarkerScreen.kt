@@ -2,6 +2,7 @@ package com.example.sergiitb_pr04_maps_app.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,9 +16,14 @@ import androidx.compose.ui.unit.dp
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Dialog
@@ -25,6 +31,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.sergiitb_pr04_maps_app.MyDrawer
 import com.example.sergiitb_pr04_maps_app.Routes
+import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 
 
@@ -34,6 +41,11 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
 
     mapViewModel.modificarEditedTitle(marker!!.title)
     mapViewModel.modificarEditedSnippet(marker!!.snippet)
+    mapViewModel.modificarCategoryName(marker!!.category.name)
+
+    val textoDropdown: String by mapViewModel.textoDropdown.observeAsState("Mostrar Todos")
+
+    val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
 
     MyDrawer(navController = navigationController, mapViewModel = mapViewModel) {
         Column(
@@ -41,6 +53,37 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            // DropdownMenu para las opciones de filtrado
+            Box {
+                OutlinedTextField(
+                    value = textoDropdown,
+                    onValueChange = { /* No permitimos cambios directos aquí */ },
+                    enabled = false,
+                    readOnly = true,
+                    modifier = Modifier
+                        .clickable { mapViewModel.modifyExpandedMapa(true) }
+                        .fillMaxWidth()
+                )
+
+                DropdownMenu(
+                    expanded = mapViewModel.pillarExpandedMapa(),
+                    onDismissRequest = { mapViewModel.modifyExpandedMapa(false) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopStart)
+                ) {
+                    // Opciones para las categorías
+                    categories.forEach { categoria ->
+                        DropdownMenuItem(text = { Text(text = categoria.name) }, onClick = {
+                            mapViewModel.modificarCategoryName(categoria.name)
+                            mapViewModel.modifyExpandedMapa(false)
+                            // texto = categoria.name // Actualizar el texto al seleccionar una categoría
+                            mapViewModel.modificarTextoDropdown(categoria.name)
+                        })
+                    }
+                }
+            }
+
             // Mostrar la imagen del marcador
             mapViewModel.editedPhoto?.let {
                 Image(
@@ -89,8 +132,11 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                     marker?.apply {
                         modificarTitle(mapViewModel.editedTitle)
                         modificarSnippet(mapViewModel.editedSnippet)
-                        mapViewModel.editedPhoto?.let { modificarPhoto(it) }
+                        if (mapViewModel.editedPhoto != null) {
+                            modificarPhoto(mapViewModel.editedPhoto!!)
+                        }
                         modificarPhotoReference(mapViewModel.pillarUriPhoto())
+                        modificarCategoria(mapViewModel.editedCategoryName)
                         mapViewModel.updateMarker(this) // Pasar el marcador actual después de aplicar los cambios
                     }
                     navigationController.navigate(Routes.ListMarkersScreen.route)
