@@ -32,10 +32,9 @@ import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 @Composable
 fun ProfileScreen(navController: NavController, mapViewModel: MapViewModel) {
     MyDrawer(navController = navController, mapViewModel = mapViewModel) {
-        val imageUrl: String by mapViewModel.imageUrlForUser.observeAsState("")
+        val imageUrl: String by mapViewModel.imageUrlForUser.observeAsState("https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1")
         val loggedUser: String by mapViewModel.loggedUser.observeAsState("")
         val userName = loggedUser.split("@")[0]
-
         mapViewModel.getProfileImageUrlForUser()
 
         if (!mapViewModel.userLogged()){
