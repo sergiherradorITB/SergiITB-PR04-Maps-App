@@ -5,12 +5,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -74,6 +78,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
     val emailProblem: Boolean by mapViewModel.emailDuplicated.observeAsState(false)
     val validLogin: Boolean by mapViewModel.validLogin.observeAsState(true)
     val passwordVisibility: Boolean by mapViewModel.passwordVisibility.observeAsState(false)
+    val permanecerLogged: Boolean by mapViewModel.permanecerLogged.observeAsState(false)
 
     val context = LocalContext.current
     val userPrefs = UserPrefs(context)
@@ -159,8 +164,19 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                 }
             )
 
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Row(Modifier.wrapContentSize()) {
+                Text(
+                    text = "Permanecer loggeado :",
+                    Modifier.align(CenterVertically),
+                    color = Color.Black // Color del texto
+                )
+                Checkbox(
+                    checked = permanecerLogged,
+                    onCheckedChange = { isChecked ->
+                        mapViewModel.cambiarPermanecerLogged(isChecked)
+                    })
+                Spacer(modifier = Modifier.width(8.dp))
+            }
 
             Button(
                 onClick = {
@@ -169,8 +185,10 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                         mapViewModel.modificarPasswordProblem(true)
                     } else if (emailState.contains("@")) {
                         mapViewModel.login(emailState, passwordState)
-                        CoroutineScope(Dispatchers.IO).launch {
-                            userPrefs.saveUserData(emailState, passwordState)
+                        if (permanecerLogged) {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                userPrefs.saveUserData(emailState, passwordState)
+                            }
                         }
                     } else {
                         mapViewModel.modificarPasswordProblem(false)
@@ -187,6 +205,11 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                         mapViewModel.modificarShowDialogPass(true)
                         mapViewModel.modificarPasswordProblem(true)
                     } else if (emailState.contains("@")) {
+                        if (permanecerLogged) {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                userPrefs.saveUserData(emailState, passwordState)
+                            }
+                        }
                         mapViewModel.register(context, emailState, passwordState)
                     } else {
                         mapViewModel.modificarPasswordProblem(false)

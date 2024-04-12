@@ -506,6 +506,13 @@ class MapViewModel : ViewModel() {
         _passwordVisibility.value = nuevoBoolean
     }
 
+    private val _permanecerLogged = MutableLiveData<Boolean>()
+    val permanecerLogged = _permanecerLogged
+
+    fun cambiarPermanecerLogged(nuevoBoolean: Boolean) {
+        _permanecerLogged.value = nuevoBoolean
+    }
+
 
     fun login(username: String?, password: String?) {
         auth.signInWithEmailAndPassword(username!!, password!!)
