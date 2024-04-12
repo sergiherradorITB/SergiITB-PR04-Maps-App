@@ -68,7 +68,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navigationController = rememberNavController()
             val mapViewModel by viewModels<MapViewModel>()
-
             NavHost(
                 navController = navigationController,
                 startDestination = Routes.LogScreen.route
