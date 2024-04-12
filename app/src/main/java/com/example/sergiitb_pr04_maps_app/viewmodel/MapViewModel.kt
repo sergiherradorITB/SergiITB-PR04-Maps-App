@@ -391,7 +391,7 @@ class MapViewModel : ViewModel() {
                         newMarker.category.name = dc.document.get("categoryName").toString()
                         newMarker.photoReference = dc.document.get("linkImage").toString()
                         tempList.add(newMarker)
-                        println("Adios :( " + newMarker.category.name)
+                        println("Adios :( " + newMarker)
                     }
 
                 }

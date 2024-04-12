@@ -135,7 +135,6 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                         if (mapViewModel.editedPhoto != null) {
                             modificarPhoto(mapViewModel.editedPhoto!!)
                         }
-                        modificarPhotoReference(mapViewModel.pillarUriPhoto())
                         modificarCategoria(mapViewModel.editedCategoryName)
                         mapViewModel.updateMarker(this) // Pasar el marcador actual después de aplicar los cambios
                     }
