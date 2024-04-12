@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -36,6 +37,10 @@ fun ProfileScreen(navController: NavController, mapViewModel: MapViewModel) {
         val userName = loggedUser.split("@")[0]
 
         mapViewModel.getProfileImageUrlForUser()
+
+        if (!mapViewModel.userLogged()){
+            mapViewModel.signOut(context = LocalContext.current, navController)
+        }
 
         // Mostrar la pantalla de captura de foto si showTakePhotoScreen es verdadero
         if (mapViewModel.showTakePhotoScreen) {
