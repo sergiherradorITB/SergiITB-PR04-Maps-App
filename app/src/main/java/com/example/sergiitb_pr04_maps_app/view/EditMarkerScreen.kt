@@ -77,7 +77,6 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                         DropdownMenuItem(text = { Text(text = categoria.name) }, onClick = {
                             mapViewModel.modificarCategoryName(categoria.name)
                             mapViewModel.modifyExpandedMapa(false)
-                            // texto = categoria.name // Actualizar el texto al seleccionar una categoría
                             mapViewModel.modificarTextoDropdown(categoria.name)
                         })
                     }

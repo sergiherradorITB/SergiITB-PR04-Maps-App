@@ -151,19 +151,20 @@ fun TakePhotoScreen(
     val launchImage = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = {
-            try {
+            if (it != null) {
                 val uri = it
 
                 bitmap = if (Build.VERSION.SDK_INT < 28) {
                     MediaStore.Images.Media.getBitmap(context.contentResolver, it)
                 } else {
-                    val source = it?.let { it1 ->
+                    val source = it.let { it1 ->
                         ImageDecoder.createSource(context.contentResolver, it1)
                     }
-                    source?.let { it1 ->
+                    source.let { it1 ->
                         ImageDecoder.decodeBitmap(it1)
-                    }!!
+                    }
                 }
+
                 mapViewModel.modifyUriPhoto(uri)
                 // Guardar la imagen en el ViewModel
                 bitmap?.let {
@@ -172,14 +173,10 @@ fun TakePhotoScreen(
                 }
                 // mapViewModel.modifyShowGuapo(false)
                 mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
-            } catch (e: NullPointerException) {
+            } else {
                 // Manejar el caso donde no se selecciona una imagen
                 Toast.makeText(context, "No se seleccionó ninguna imagen", Toast.LENGTH_SHORT).show()
-                mapViewModel.modifyShowGuapo(false);println("ERRORAZO");println(e.stackTrace);println(e.message)
-            } catch (e:Exception){
-                // Manejar el caso donde no se selecciona una imagen
-                Toast.makeText(context, "Error no controlado", Toast.LENGTH_SHORT).show()
-                mapViewModel.modifyShowGuapo(false);println("ERRORAZO");println(e.stackTrace);println(e.message)
+                mapViewModel.modifyShowGuapo(false)
             }
         })
 

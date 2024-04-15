@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -219,6 +220,12 @@ class MapViewModel : ViewModel() {
     private val _textoDropDown = MutableLiveData<String>()
     val textoDropdown: LiveData<String> = _textoDropDown
 
+    private val _showBottomSheet = MutableLiveData<Boolean>()
+    val showBottomSheet = _showBottomSheet
+
+    fun modificarShowBottomSheet(nuevoBoolean: Boolean){
+        _showBottomSheet.value = nuevoBoolean
+    }
     fun modificarTextoDropdown(nuevoTexto:String){
         _textoDropDown.value = nuevoTexto
     }

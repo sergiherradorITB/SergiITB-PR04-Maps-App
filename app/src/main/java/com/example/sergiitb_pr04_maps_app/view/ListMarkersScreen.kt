@@ -61,11 +61,13 @@ import kotlinx.coroutines.launch
 fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) {
     val lazyGridState = rememberLazyGridState()
     val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
-    var texto by remember { mutableStateOf("Mostrar Todos") }
     val marcadores by mapViewModel.markers.observeAsState(emptyList())
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    var showBottomSheet by remember { mutableStateOf(false) }
+
+    val showBottomSheet by mapViewModel.showBottomSheet.observeAsState(false)
+    val texto: String by mapViewModel.textoDropdown.observeAsState("Mostrar Todos")
+
 
     mapViewModel.pillarTodosMarkers()
 
@@ -102,8 +104,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                             // mapViewModel.setSelectedCategory(null) // Establecer la categoría seleccionada como nula
                             mapViewModel.modifyExpandedMapa(false)
                             mapViewModel.pillarTodosMarkers()
-                            texto =
-                                "Mostrar Todos" // Actualizar el texto al seleccionar la opción "Mostrar Todos"
+                            mapViewModel.modificarTextoDropdown("Mostrar Todos")
                         })
 
                         // Opciones para las categorías
@@ -111,8 +112,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                             DropdownMenuItem(text = { Text(text = categoria.name) }, onClick = {
                                 mapViewModel.pillarTodosMarkersCategoria(categoria.name)
                                 mapViewModel.modifyExpandedMapa(false)
-                                texto =
-                                    categoria.name // Actualizar el texto al seleccionar una categoría
+                                mapViewModel.modificarTextoDropdown(categoria.name) // Actualizar el texto al seleccionar una categoría
                             })
                         }
                     }
@@ -128,7 +128,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                         Text(text = "Puedes agregar uno ahora mismo haciendo click en el botón")
                         Button(
                             onClick = {
-                                showBottomSheet = true
+                                mapViewModel.modificarShowBottomSheet(true)
                             },
                             modifier = Modifier
                                 .padding(top = 16.dp, bottom = 33.dp)
@@ -158,7 +158,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                 if (showBottomSheet) {
                     ModalBottomSheet(
                         onDismissRequest = {
-                            showBottomSheet = false
+                            mapViewModel.modificarShowBottomSheet(false)
                         },
                         sheetState = sheetState
                     ) {
@@ -170,7 +170,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                                 scope.launch { sheetState.hide() }
                                     .invokeOnCompletion {
                                         if (!sheetState.isVisible) {
-                                            showBottomSheet = false
+                                            mapViewModel.modificarShowBottomSheet(false)
                                         }
                                     }
                             }
@@ -180,7 +180,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
             }
             Button(
                 onClick = {
-                    showBottomSheet = true
+                    mapViewModel.modificarShowBottomSheet(true)
                 },
                 modifier = Modifier
                     .align(Alignment.BottomStart)
