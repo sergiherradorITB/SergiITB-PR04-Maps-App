@@ -44,7 +44,6 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
     mapViewModel.modificarCategoryName(marker!!.category.name)
 
     val textoDropdown: String by mapViewModel.textoDropdown.observeAsState("Mostrar Todos")
-
     val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
 
     MyDrawer(navController = navigationController, mapViewModel = mapViewModel) {
@@ -90,7 +89,8 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(400.dp),
+                        .height(333.dp)
+                        .padding(top = 10.dp),
                     contentScale = ContentScale.Crop
                 )
             }
@@ -125,7 +125,6 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
 
             // Botón para guardar los cambios
 
-
             Button(
                 onClick = {
                     marker?.apply {
@@ -151,6 +150,11 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                 }, modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Borrar")
+            }
+
+            Row {
+                Text(text = "Latitud: ${marker!!.latitude.toString().take(10)}")
+                Text(text = "Longitud: ${marker!!.longitude.toString().take(10)}")
             }
         }
 
