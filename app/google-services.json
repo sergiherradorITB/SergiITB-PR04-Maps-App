@@ -12,7 +12,20 @@
           "package_name": "com.example.sergiitb_pr04_maps_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1010468137330-7urq4flu18bmlblmgr0o2rasnkcktjjc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sergiitb_pr04_maps_app",
+            "certificate_hash": "746707852e59925f6fc4e66fe1f7c379dc68c681"
+          }
+        },
+        {
+          "client_id": "1010468137330-mufrhog4am1l5b5i7luj1sdbc0ihc6lk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC5nLXrcencmz82WDmddkhX2cWwW6ePkcE"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1010468137330-mufrhog4am1l5b5i7luj1sdbc0ihc6lk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
