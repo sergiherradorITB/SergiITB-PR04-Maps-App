@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -45,7 +46,9 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
 
     val textoDropdown: String by mapViewModel.textoDropdown.observeAsState("Mostrar Todos")
     val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
-
+    if (!mapViewModel.userLogged()){
+        mapViewModel.signOut(context = LocalContext.current, navigationController)
+    }
     MyDrawer(navController = navigationController, mapViewModel = mapViewModel) {
         Column(
             modifier = Modifier

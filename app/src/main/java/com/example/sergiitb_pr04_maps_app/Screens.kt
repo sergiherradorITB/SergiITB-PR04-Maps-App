@@ -20,10 +20,17 @@ sealed class Screens(val route: String, val title: String) {
     ) : Screens(route, title) {
         //object Home : DrawerScreens(Routes.MenuScreen.route, Icons.Filled.Home, "Home")
         object Mapa : DrawerScreens(Routes.MapScreen.route, Icons.Filled.Home, "Mapa")
-        object Listar : DrawerScreens(Routes.ListMarkersScreen.route, Icons.Filled.List, "Listar marcadores")
+        object Listar :
+            DrawerScreens(Routes.ListMarkersScreen.route, Icons.Filled.List, "Listar marcadores")
+
+        object ProfileScreen : DrawerScreens(
+            Routes.ProfileScreen.route,
+            Icons.Filled.PersonPin,
+            "Ver detalles usuario"
+        )
+
         object CerrarSesion : DrawerScreens("cerrar_sesion", Icons.Filled.Close, "Cerrar Sesión")
 
-        object ProfileScreen : DrawerScreens(Routes.ProfileScreen.route, Icons.Filled.PersonPin, "Ver detalles usuario")
 
     }
 }
@@ -32,6 +39,6 @@ val screensFromDrawer = listOf(
     //Screens.DrawerScreens.Home,
     Screens.DrawerScreens.Mapa,
     Screens.DrawerScreens.Listar,
+    Screens.DrawerScreens.ProfileScreen,
     Screens.DrawerScreens.CerrarSesion,
-    Screens.DrawerScreens.ProfileScreen
 )

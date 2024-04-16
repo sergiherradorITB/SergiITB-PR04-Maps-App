@@ -69,6 +69,9 @@ fun Camara(navigationController: NavController, mapViewModel: MapViewModel) {
     )
     val showPermissionDenied by mapViewModel.showPermissionDenied.observeAsState(false)
 
+    if (!mapViewModel.userLogged()){
+        mapViewModel.signOut(context = LocalContext.current, navigationController)
+    }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->

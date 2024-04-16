@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
@@ -58,6 +59,10 @@ fun AddMarkerScreen(
     val permissionState =
         rememberPermissionState(permission = Manifest.permission.CAMERA)
     Column(Modifier.fillMaxHeight(1f)) {
+
+        if (!mapViewModel.userLogged()){
+            mapViewModel.signOut(context = LocalContext.current, navController)
+        }
 
         LaunchedEffect(Unit) {
             permissionState.launchPermissionRequest()
