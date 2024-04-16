@@ -25,17 +25,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.example.sergiitb_pr04_maps_app.MyDrawer
 import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapViewModel) {
     val marker by mapViewModel.editingMarkers.observeAsState()
@@ -46,7 +50,7 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
 
     val textoDropdown: String by mapViewModel.textoDropdown.observeAsState("Mostrar Todos")
     val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
-    if (!mapViewModel.userLogged()){
+    if (!mapViewModel.userLogged()) {
         mapViewModel.signOut(context = LocalContext.current, navigationController)
     }
     MyDrawer(navController = navigationController, mapViewModel = mapViewModel) {
@@ -85,16 +89,27 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                 }
             }
 
-            // Mostrar la imagen del marcador
-            mapViewModel.editedPhoto?.let {
+
+            if (mapViewModel.editedPhoto != null) {
                 Image(
-                    bitmap = it.asImageBitmap(),
+                    bitmap = mapViewModel.editedPhoto!!.asImageBitmap(),
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(333.dp)
                         .padding(top = 10.dp),
                     contentScale = ContentScale.Crop
+                )
+            } else {
+                GlideImage(
+                    model = marker!!.photoReference,
+                    contentDescription = "Image from Storage",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(333.dp)
+                        .alpha(0.33f)
+                        .padding(top = 10.dp),
                 )
             }
 
@@ -127,6 +142,7 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
             )
 
             // Botón para guardar los cambios
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
@@ -155,7 +171,10 @@ fun EditMarkerScreen(navigationController: NavHostController, mapViewModel: MapV
                 Text(text = "Borrar")
             }
 
-            Row {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
                 Text(text = "Latitud: ${marker!!.latitude.toString().take(10)}")
                 Text(text = "Longitud: ${marker!!.longitude.toString().take(10)}")
             }
