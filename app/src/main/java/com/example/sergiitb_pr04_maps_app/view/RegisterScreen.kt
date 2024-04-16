@@ -45,12 +45,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -58,6 +60,7 @@ import com.example.sergiitb_pr04_maps_app.R
 import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.UserPrefs
+import com.example.sergiitb_pr04_maps_app.model.Usuari
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import kotlinx.coroutines.CoroutineScope
@@ -73,6 +76,11 @@ fun RegisterScreen(navController: NavController, mapViewModel: MapViewModel) {
     val goToNext: Boolean by mapViewModel.goToNext.observeAsState(false)
     val emailState: String by mapViewModel.emailState.observeAsState("")
     val passwordState: String by mapViewModel.passwordState.observeAsState("")
+    val nombreState: String by mapViewModel.nombreState.observeAsState("")
+    val apellidoState: String by mapViewModel.apellidoState.observeAsState("")
+    val ciudadState: String by mapViewModel.ciudadState.observeAsState("")
+
+
     val showDialogPass: Boolean by mapViewModel.showDialogPass.observeAsState(false)
     val passwordProblem: Boolean by mapViewModel.passwordProblem.observeAsState(false)
     val showDialogAuth: Boolean by mapViewModel.showDialogAuth.observeAsState(false)
@@ -124,6 +132,50 @@ fun RegisterScreen(navController: NavController, mapViewModel: MapViewModel) {
                     .fillMaxWidth()
                     .height(200.dp),
                 contentScale = ContentScale.Fit,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextField(
+                value = nombreState,
+                onValueChange = { mapViewModel.modificarNombreState(it) },
+                maxLines = 1,
+                label = { Text(text = "Nombre") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(onNext = { keyboardController?.hide() })
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextField(
+                value = apellidoState,
+                onValueChange = { mapViewModel.modificarApellidoState(it) },
+                maxLines = 1,
+                label = { Text(text = "Apellido") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(onNext = { keyboardController?.hide() })
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextField(
+                value = ciudadState,
+                onValueChange = { mapViewModel.modificarCiudadState(it) },
+                maxLines = 1,
+                label = { Text(text = "Ciudad") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(onNext = { keyboardController?.hide() })
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -199,10 +251,7 @@ fun RegisterScreen(navController: NavController, mapViewModel: MapViewModel) {
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Register")
-            }
-            Button(onClick = { navController.navigate(Routes.LogScreen.route) }) {
-                Text(text = "Ir a Iniciar sesión")
+                Text(text = "Registrar", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
 
             Row {

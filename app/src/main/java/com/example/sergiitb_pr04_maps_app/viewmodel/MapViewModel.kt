@@ -19,6 +19,7 @@ import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.model.Repository
 import com.example.sergiitb_pr04_maps_app.model.UserPrefs
+import com.example.sergiitb_pr04_maps_app.model.Usuari
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.recaptcha.RecaptchaException
 import com.google.firebase.auth.FirebaseAuth
@@ -468,6 +469,19 @@ class MapViewModel : ViewModel() {
     private val _passwordState = MutableLiveData<String>()
     val passwordState: LiveData<String> = _passwordState
 
+    // LiveData para passwordState
+    private val _nombreState = MutableLiveData<String>()
+    val nombreState: LiveData<String> = _nombreState
+
+
+    // LiveData para passwordState
+    private val _apellidoState = MutableLiveData<String>()
+    val apellidoState: LiveData<String> = _apellidoState
+
+    // LiveData para passwordState
+    private val _ciudadState = MutableLiveData<String>()
+    val ciudadState: LiveData<String> = _ciudadState
+
     // LiveData para showDialog
     private val _showDialogPass = MutableLiveData<Boolean>()
     val showDialogPass: LiveData<Boolean> = _showDialogPass
@@ -482,6 +496,18 @@ class MapViewModel : ViewModel() {
 
     fun modificarPasswordState(value: String) {
         _passwordState.value = value
+    }
+
+    fun modificarNombreState(value: String) {
+        _nombreState.value = value
+    }
+
+    fun modificarApellidoState(value: String) {
+        _apellidoState.value = value
+    }
+
+    fun modificarCiudadState(value: String) {
+        _ciudadState.value = value
     }
 
     fun modificarShowDialogPass(value: Boolean) {
@@ -527,6 +553,10 @@ class MapViewModel : ViewModel() {
                                     .add(
                                         hashMapOf(
                                             "owner" to _loggedUser.value,
+                                            "name" to _nombreState.value,
+                                            "apellido" to _apellidoState.value,
+                                            "ciudad" to _ciudadState.value,
+                                            // "password" to usuari.password (es logico guardar la contraseña rarete, no?)
                                         )
                                     )
                             }
@@ -579,6 +609,10 @@ class MapViewModel : ViewModel() {
                                     .add(
                                         hashMapOf(
                                             "owner" to _loggedUser.value,
+                                            "name" to _nombreState.value,
+                                            "apellido" to _apellidoState.value,
+                                            "ciudad" to _ciudadState.value,
+                                            // "password" to usuari.password (es logico guardar la contraseña rarete, no?)
                                         )
                                     )
                             }

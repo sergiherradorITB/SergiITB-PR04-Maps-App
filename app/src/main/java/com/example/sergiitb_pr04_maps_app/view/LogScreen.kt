@@ -200,7 +200,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                         mapViewModel.modificarShowDialogPass(true)
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(text = "Login", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
@@ -208,7 +208,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
             Row {
                 Text(text = "Crea una cuenta ")
                 Column {
-                    Text(text ="Registrarse", modifier = Modifier.clickable { navController.navigate(Routes.LogScreen.route) }, color = Color.Blue)
+                    Text(text ="Registrarse", modifier = Modifier.clickable { navController.navigate(Routes.RegisterScreen.route) }, color = Color.Blue)
                 }
             }
         }
