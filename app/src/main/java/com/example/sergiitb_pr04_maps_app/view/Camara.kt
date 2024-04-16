@@ -2,6 +2,7 @@ package com.example.sergiitb_pr04_maps_app.view
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -57,6 +58,7 @@ import androidx.navigation.NavController
 import com.example.sergiitb_pr04_maps_app.R
 import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
+import java.io.OutputStream
 
 @Composable
 fun Camara(navigationController: NavController, mapViewModel: MapViewModel) {
@@ -175,7 +177,8 @@ fun TakePhotoScreen(
                 mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
             } else {
                 // Manejar el caso donde no se selecciona una imagen
-                Toast.makeText(context, "No se seleccionó ninguna imagen", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "No se seleccionó ninguna imagen", Toast.LENGTH_SHORT)
+                    .show()
                 mapViewModel.modifyShowGuapo(false)
             }
         })
@@ -245,6 +248,7 @@ fun takePhoto(
             override fun onCaptureSuccess(image: ImageProxy) {
                 super.onCaptureSuccess(image)
                 onPhotoTaken(image.toBitmap())
+                mapViewModel.modifyUriPhoto(bitmapToUri(context, image.toBitmap()))
             }
 
             override fun onError(exception: ImageCaptureException) {
@@ -253,6 +257,27 @@ fun takePhoto(
             }
         }
     )
+}
+
+fun bitmapToUri(context: Context, bitmap: Bitmap): Uri? {
+    val filename = "${System.currentTimeMillis()}.jpg"
+    val values = ContentValues().apply {
+        put(MediaStore.Images.Media.TITLE, filename)
+        put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+        put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis())
+        put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
+    }
+
+    val uri: Uri? =
+        context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+    uri?.let {
+        val outstream: OutputStream? = context.contentResolver.openOutputStream(it)
+        outstream?.let { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
+        outstream?.close()
+    }
+
+    return uri
 }
 
 @Composable
