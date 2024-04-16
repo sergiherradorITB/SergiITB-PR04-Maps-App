@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.Categoria
@@ -22,6 +23,7 @@ import com.example.sergiitb_pr04_maps_app.model.UserPrefs
 import com.example.sergiitb_pr04_maps_app.model.Usuari
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.recaptcha.RecaptchaException
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -224,12 +226,14 @@ class MapViewModel : ViewModel() {
     private val _showBottomSheet = MutableLiveData<Boolean>()
     val showBottomSheet = _showBottomSheet
 
-    fun modificarShowBottomSheet(nuevoBoolean: Boolean){
+    fun modificarShowBottomSheet(nuevoBoolean: Boolean) {
         _showBottomSheet.value = nuevoBoolean
     }
-    fun modificarTextoDropdown(nuevoTexto:String){
+
+    fun modificarTextoDropdown(nuevoTexto: String) {
         _textoDropDown.value = nuevoTexto
     }
+
     init {
         // Inicializar la lista de categorías si es necesario
         if (_categories.value == null) {
@@ -253,30 +257,30 @@ class MapViewModel : ViewModel() {
     fun updateMarker(editedMarker: MarkerSergi) {
         if (uriFoto.value != null) {
             uploadImage(uriFoto.value!!, editedMarker) { downloadUrl ->
-            // Actualizar la referencia de la foto en el marcador con la URL de descarga
-            editedMarker.modificarPhotoReference(downloadUrl)
+                // Actualizar la referencia de la foto en el marcador con la URL de descarga
+                editedMarker.modificarPhotoReference(downloadUrl)
 
-            // Agregar el marcador a la base de datos con la referencia de la foto actualizada
-            database.collection("markers").document(editedMarker.markerId!!)
-                .set(
-                    hashMapOf(
-                        "owner" to _loggedUser.value,
-                        "positionLatitude" to editedMarker.latitude,
-                        "positionLongitude" to editedMarker.longitude,
-                        "title" to editedMarker.title,
-                        "snippet" to editedMarker.snippet,
-                        "categoryName" to editedMarker.category.name,
-                        "linkImage" to editedMarker.photoReference
+                // Agregar el marcador a la base de datos con la referencia de la foto actualizada
+                database.collection("markers").document(editedMarker.markerId!!)
+                    .set(
+                        hashMapOf(
+                            "owner" to _loggedUser.value,
+                            "positionLatitude" to editedMarker.latitude,
+                            "positionLongitude" to editedMarker.longitude,
+                            "title" to editedMarker.title,
+                            "snippet" to editedMarker.snippet,
+                            "categoryName" to editedMarker.category.name,
+                            "linkImage" to editedMarker.photoReference
+                        )
                     )
-                )
-                .addOnSuccessListener {
-                    println("Marker añadido correctamente a la base de datos")
-                    // Solicitar la lista completa de marcadores después de añadir uno nuevo
-                    pillarTodosMarkers()
-                }
-                .addOnFailureListener { e ->
-                    println("Error al añadir el marker a la base de datos: ${e.message}")
-                }
+                    .addOnSuccessListener {
+                        println("Marker añadido correctamente a la base de datos")
+                        // Solicitar la lista completa de marcadores después de añadir uno nuevo
+                        pillarTodosMarkers()
+                    }
+                    .addOnFailureListener { e ->
+                        println("Error al añadir el marker a la base de datos: ${e.message}")
+                    }
 
             }
         } else {
@@ -456,6 +460,10 @@ class MapViewModel : ViewModel() {
     val loggedUser = _loggedUser
     fun pillarLoggedUser(): String {
         return _loggedUser.value.toString()
+    }
+
+    fun modificarLoggedUser(nuevo: String) {
+        _loggedUser.value = nuevo
     }
 
     private val _isLoading = MutableLiveData<Boolean>(true)
@@ -660,7 +668,8 @@ class MapViewModel : ViewModel() {
                     return@addSnapshotListener
                 }
 
-                var tempString: String = "https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1"
+                var tempString: String =
+                    "https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1"
 
                 if (value != null) {
                     for (dc: DocumentChange in value.documentChanges) {
@@ -702,4 +711,39 @@ class MapViewModel : ViewModel() {
         }
     }
 
+    fun signInWithGoogleCredential(credential: AuthCredential, home: () -> Unit) =
+        viewModelScope.launch {
+            try {
+                auth.signInWithCredential(credential)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d("MascotaFeliz", "Log con exito")
+                            val userRef =
+                                database.collection("user").whereEqualTo("owner", _loggedUser.value)
+                            userRef.get()
+                                .addOnSuccessListener { documents ->
+                                    if (documents.isEmpty) {
+                                        // Si no hay documentos para este usuario, agregar uno nuevo
+                                        database.collection("user")
+                                            .add(
+                                                hashMapOf(
+                                                    "owner" to _loggedUser.value,
+                                                    // "name" to _nombreState.value,
+                                                    // "apellido" to _apellidoState.value,
+                                                    // "ciudad" to _ciudadState.value,
+                                                    // "password" to usuari.password (es logico guardar la contraseña rarete, no?)
+                                                )
+                                            )
+                                    }
+                                }
+                            home()
+                        }
+                    }
+                    .addOnFailureListener {
+                        Log.d("MascotaFeliz", "Fallo al loguear")
+                    }
+            } catch (ex: Exception) {
+                Log.d("MascotaFeliz", "Excepción al hacer log" + ex.localizedMessage)
+            }
+        }
 }

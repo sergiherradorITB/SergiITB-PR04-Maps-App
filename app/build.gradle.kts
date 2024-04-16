@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // Add the Google services Gradle plugin
@@ -22,17 +24,35 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        var properties:Properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+
+        buildConfigField("String","TOKEN","\"${properties.getProperty("TOKEN")}\"")
     }
 
     buildTypes {
-        release {
-            isMinifyEnabled = false
+        getByName("release") {
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            val secretsPropertiesFile = file("local.properties")
+            if (secretsPropertiesFile.exists()) {
+                val properties = Properties()
+                secretsPropertiesFile.inputStream().use { stream ->
+                    properties.load(stream)
+                }
+                // Agregar el token al archivo de recursos generados
+                buildConfigField("String", "TOKEN", "\"${properties.getProperty("TOKEN")}\"")
+            } else {
+                println("Archivo 'secrets.properties' no encontrado. Asegúrate de crearlo en el directorio 'app'.")
+            }
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -111,6 +131,13 @@ dependencies {
     // Datastore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
+
+    // Add the dependency for the Firebase Authentication library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-auth-ktx")
+
+    // Also add the dependency for the Google Play services library and specify its version
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 }
 
 secrets {

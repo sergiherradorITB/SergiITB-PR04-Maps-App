@@ -1,6 +1,9 @@
 package com.example.sergiitb_pr04_maps_app.view
 
 import android.annotation.SuppressLint
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,35 +15,32 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -55,13 +55,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.example.sergiitb_pr04_maps_app.R
 import com.example.sergiitb_pr04_maps_app.Routes
-import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.UserPrefs
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -202,14 +203,70 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(text = "Login", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(
+                    text = "Login",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
 
             Row {
                 Text(text = "Crea una cuenta ")
                 Column {
-                    Text(text ="Registrarse", modifier = Modifier.clickable { navController.navigate(Routes.RegisterScreen.route) }, color = Color.Blue)
+                    Text(
+                        text = "Registrarse",
+                        modifier = Modifier.clickable { navController.navigate(Routes.RegisterScreen.route) },
+                        color = Color.Blue
+                    )
                 }
+            }
+
+            val launcher =
+                rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartActivityForResult()
+                ) {
+                    val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+                    try {
+                        val account = task.getResult(ApiException::class.java)
+                        val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+                        mapViewModel.signInWithGoogleCredential(credential) {
+                            navController.navigate(Routes.MapScreen.route)
+                        }
+                        if (account.email != null) mapViewModel.modificarLoggedUser(account.email!!)
+
+                    } catch (e: Exception) {
+                        Log.d("MascotaFeliz", "GoogleSign failed")
+                    }
+                }
+
+
+            Row(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable {
+                        val opciones = GoogleSignInOptions
+                            .Builder(
+                                GoogleSignInOptions.DEFAULT_SIGN_IN
+                            )
+                            //.requestIdToken(token)
+                            .requestEmail()
+                            .build()
+                        val googleSignInCliente = GoogleSignIn.getClient(context, opciones)
+                        launcher.launch(googleSignInCliente.signInIntent)
+                    },
+                verticalAlignment = CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.googlelogo),
+                    contentDescription = "Login de google",
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .size(40.dp)
+                )
+                Text(text = "Login con Google", fontSize = 18.sp)
             }
         }
         MyDialogPasswordOrEmail(
