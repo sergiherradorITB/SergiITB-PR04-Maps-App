@@ -130,6 +130,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
             TextField(
                 value = emailState,
                 onValueChange = { mapViewModel.modificarEmailState(it) },
+                maxLines = 1,
                 label = { Text(text = "Email") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions.Default.copy(
@@ -145,6 +146,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                 value = passwordState,
                 onValueChange = { mapViewModel.modificarPasswordState(it) },
                 label = { Text(text = "Password") },
+                maxLines = 1,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {

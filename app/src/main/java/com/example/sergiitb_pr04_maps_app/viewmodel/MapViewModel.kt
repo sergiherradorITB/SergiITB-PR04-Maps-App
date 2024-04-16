@@ -660,6 +660,7 @@ class MapViewModel : ViewModel() {
                                 println("Error al actualizar el usuario en la base de datos: ${e.message}")
                             }
                     }
+                    getProfileImageUrlForUser()
                 }
                 .addOnFailureListener { exception ->
                     println("Error al consultar la base de datos: ${exception.message}")
