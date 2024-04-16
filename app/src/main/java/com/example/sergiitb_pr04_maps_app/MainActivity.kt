@@ -59,6 +59,7 @@ import com.example.sergiitb_pr04_maps_app.view.LoginScreen
 import com.example.sergiitb_pr04_maps_app.view.MapScreen
 import com.example.sergiitb_pr04_maps_app.view.MenuScreen
 import com.example.sergiitb_pr04_maps_app.view.ProfileScreen
+import com.example.sergiitb_pr04_maps_app.view.RegisterScreen
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 import kotlinx.coroutines.launch
 
@@ -90,6 +91,9 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(Routes.LogScreen.route) {
                     LoginScreen(navigationController, mapViewModel)
+                }
+                composable(Routes.RegisterScreen.route) {
+                    RegisterScreen(navigationController, mapViewModel)
                 }
                 composable(Routes.ProfileScreen.route) {
                     ProfileScreen(navigationController, mapViewModel)
