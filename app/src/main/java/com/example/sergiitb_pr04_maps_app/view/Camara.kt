@@ -86,7 +86,7 @@ fun Camara(navigationController: NavController, mapViewModel: MapViewModel) {
                 )
                 if (!shouldShowPermissionRationale) {
                     Log.i("CameraScreen", "No podemos volver a pedir permisos")
-                    mapViewModel.setShowPermissionDenied(true)
+                    mapViewModel.setShowPermissionDenied()
                 }
             }
         }
@@ -139,7 +139,6 @@ fun openAppSettings(activity: Activity) {
 
 @Composable
 fun TakePhotoScreen(
-    navigationController: NavController,
     mapViewModel: MapViewModel,
     onPhotoCaptured: (Bitmap) -> Unit
 ) {

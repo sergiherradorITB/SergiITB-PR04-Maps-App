@@ -82,7 +82,7 @@ class MapViewModel : ViewModel() {
     private val selectedCategoria = mutableStateOf<Categoria?>(null)
     private val photoBitmap = mutableStateOf<Bitmap?>(null)
     private val _uriFoto = mutableStateOf<Uri?>(null)
-    var uriFoto = _uriFoto
+    private var uriFoto = _uriFoto
 
     private val photoTaken = mutableStateOf(false)
     private val showGuapo = mutableStateOf(false)
@@ -102,7 +102,7 @@ class MapViewModel : ViewModel() {
     private val _markers = MutableLiveData<MutableList<MarkerSergi>>()
     val markers: LiveData<MutableList<MarkerSergi>> = _markers
 
-    var repository: Repository = Repository()
+    private var repository: Repository = Repository()
 
     fun setCameraPermissionGranted(granted: Boolean) {
         _cameraPermissionGranted.value = granted
@@ -112,7 +112,7 @@ class MapViewModel : ViewModel() {
         _shouldShowPermissionRationale.value = should
     }
 
-    fun setShowPermissionDenied(denied: Boolean) {
+    fun setShowPermissionDenied() {
         _showPermissionDenied
     }
 
@@ -144,10 +144,6 @@ class MapViewModel : ViewModel() {
         _uriFoto.value = newValue
     }
 
-    fun pillarUriPhoto(): String {
-        return uriFoto.value.toString()
-    }
-
     fun modifyPhotoBitmap(newValue: Bitmap?) {
         photoBitmap.value = newValue
     }
@@ -172,8 +168,7 @@ class MapViewModel : ViewModel() {
         return showGuapo.value
     }
 
-    var expanded by mutableStateOf(false)
-        private set
+    private var expanded by mutableStateOf(false)
 
     fun modifyExpanded(valorNuevo: Boolean) {
         expanded = valorNuevo
@@ -183,8 +178,7 @@ class MapViewModel : ViewModel() {
         return expanded
     }
 
-    var expandedMapa by mutableStateOf(false)
-        private set
+    private var expandedMapa by mutableStateOf(false)
 
     fun modifyExpandedMapa(valorNuevo: Boolean) {
         expandedMapa = valorNuevo
@@ -254,7 +248,7 @@ class MapViewModel : ViewModel() {
             val oldImageUrl = editedMarker.photoReference
 
             // Subir la nueva imagen y actualizar el marcador
-            uploadImage(uriFoto.value!!, editedMarker) { downloadUrl ->
+            uploadImage(uriFoto.value!!) { downloadUrl ->
                 // Actualizar la referencia de la foto en el marcador con la URL de descarga
                 editedMarker.modificarPhotoReference(downloadUrl)
 
@@ -312,7 +306,7 @@ class MapViewModel : ViewModel() {
     }
 
     fun addMarkerToDatabase(marker: MarkerSergi) {
-        uploadImage(uriFoto.value!!, marker) { downloadUrl ->
+        uploadImage(uriFoto.value!!) { downloadUrl ->
             // Actualizar la referencia de la foto en el marcador con la URL de descarga
             marker.modificarPhotoReference(downloadUrl)
 
@@ -340,30 +334,7 @@ class MapViewModel : ViewModel() {
         }
     }
 
-    fun uploadImage(imageUri: Uri, marker: MarkerSergi, onComplete: (String) -> Unit) {
-        println("XAVI UWU")
-        val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault())
-        val now = Date()
-        val fileName = formatter.format(now)
-        val storage = FirebaseStorage.getInstance().getReference("images/$fileName")
-
-        storage.putFile(imageUri)
-            .addOnSuccessListener { uploadTask ->
-                Log.i("IMAGE UPLOAD", "Image uploaded successfully")
-                println("Xavi peruano fino")
-                uploadTask.storage.downloadUrl.addOnSuccessListener { uri ->
-                    val downloadUrl = uri.toString()
-                    println("URL de descarga de la imagen: $downloadUrl")
-                    onComplete(downloadUrl) // Llamar a la funcion que le pasamos, en este caso le pasamos la de añadir marcador a la bbdd
-                }
-            }
-            .addOnFailureListener {
-                Log.i("IMAGE UPLOAD", "Image upload failed")
-                println("Xavi peruano malo")
-            }
-    }
-
-    fun uploadImage(imageUri: Uri, onComplete: (String) -> Unit) {
+    private fun uploadImage(imageUri: Uri, onComplete: (String) -> Unit) {
         println("XAVI UWU")
         val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault())
         val now = Date()
@@ -406,7 +377,7 @@ class MapViewModel : ViewModel() {
                         newMarker.category.name = dc.document.get("categoryName").toString()
                         newMarker.photoReference = dc.document.get("linkImage").toString()
                         tempList.add(newMarker)
-                        println("Adios :( " + newMarker)
+                        println("Adios :( $newMarker")
                     }
 
                 }
@@ -446,12 +417,7 @@ class MapViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
 
     fun userLogged(): Boolean {
-        val resultat: Boolean = if (auth.currentUser == null) {
-            false
-        } else {
-            true
-        }
-        return resultat
+        return auth.currentUser != null
     }
 
     // LiveData para isLoading
@@ -469,7 +435,7 @@ class MapViewModel : ViewModel() {
         _loggedUser.value = nuevo
     }
 
-    private val _isLoading = MutableLiveData<Boolean>(true)
+    private val _isLoading = MutableLiveData(true)
     val isLoading = _isLoading
 
     // LiveData para emailState
@@ -605,7 +571,7 @@ class MapViewModel : ViewModel() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     _userId.value = task.result.user?.uid
-                    _loggedUser.value = task.result.user?.email?.toString()
+                    _loggedUser.value = task.result.user?.email
                     _goToNext.value = true
                     modifyProcessing(false)
                     // Agregar el marcador a la base de datos con la referencia de la foto actualizada
@@ -636,7 +602,7 @@ class MapViewModel : ViewModel() {
                     _showDialogAuth.value = true
                 }
             }
-            .addOnFailureListener { task ->
+            .addOnFailureListener {
                 _validLogin.value = false
             }
     }
@@ -671,7 +637,7 @@ class MapViewModel : ViewModel() {
                     return@addSnapshotListener
                 }
 
-                var tempString: String =
+                var tempString =
                     "https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1"
 
                 if (value != null) {
@@ -722,7 +688,7 @@ class MapViewModel : ViewModel() {
         }
     }
 
-    fun deleteProfileImage(imageUrl: String) {
+    private fun deleteProfileImage(imageUrl: String) {
         // Obtener la referencia de Firebase Storage
         val storageRef = Firebase.storage.reference
 

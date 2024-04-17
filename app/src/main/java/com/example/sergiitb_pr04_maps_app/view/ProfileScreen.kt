@@ -1,13 +1,10 @@
 package com.example.sergiitb_pr04_maps_app.view
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -18,7 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -29,7 +25,6 @@ import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.sergiitb_pr04_maps_app.MyDrawer
-import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -51,14 +46,12 @@ fun ProfileScreen(navController: NavController, mapViewModel: MapViewModel) {
                 modifier = Modifier.fillMaxSize() // Esto hará que la pantalla de captura de foto ocupe toda la pantalla
             ) {
                 TakePhotoScreen(
-                    navigationController = navController,
-                    mapViewModel = mapViewModel,
-                    onPhotoCaptured = { photo ->
-                        mapViewModel.modificarEditedPhoto(photo)
-                        mapViewModel.modificarShowTakePhotoScreen(false)
-                        mapViewModel.modificarEditedPhoto(photo)
-                    }
-                )
+                    mapViewModel = mapViewModel
+                ) { photo ->
+                    mapViewModel.modificarEditedPhoto(photo)
+                    mapViewModel.modificarShowTakePhotoScreen(false)
+                    mapViewModel.modificarEditedPhoto(photo)
+                }
             }
         } else {
             Column(

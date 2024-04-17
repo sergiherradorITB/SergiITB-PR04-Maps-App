@@ -6,7 +6,6 @@ sealed class Routes(val route:String) {
     object AddMarkerScreen:Routes("addmarkerscreen")
     object ListMarkersScreen:Routes("listmarkscreen")
     object Camara:Routes("camara")
-
     object TakePhotoScreen:Routes("takephoto")
     object EditMarker:Routes("editmarker")
     object LogScreen:Routes("logscreen")
