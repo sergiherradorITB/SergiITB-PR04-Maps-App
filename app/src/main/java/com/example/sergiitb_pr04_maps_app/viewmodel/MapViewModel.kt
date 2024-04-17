@@ -6,10 +6,8 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,20 +18,14 @@ import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.model.Repository
 import com.example.sergiitb_pr04_maps_app.model.UserPrefs
-import com.example.sergiitb_pr04_maps_app.model.Usuari
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.recaptcha.RecaptchaException
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthException
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -713,6 +705,7 @@ class MapViewModel : ViewModel() {
 
     fun signInWithGoogleCredential(credential: AuthCredential, home: () -> Unit) =
         viewModelScope.launch {
+            modifyProcessing(false)
             try {
                 auth.signInWithCredential(credential)
                     .addOnCompleteListener { task ->

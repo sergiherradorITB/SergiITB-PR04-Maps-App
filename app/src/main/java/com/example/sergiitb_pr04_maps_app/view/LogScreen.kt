@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.sergiitb_pr04_maps_app.BuildConfig
 import com.example.sergiitb_pr04_maps_app.R
 import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.UserPrefs
@@ -240,7 +241,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                     }
                 }
 
-
+            val token = BuildConfig.TOKEN
             Row(
                 modifier = Modifier
                     .padding(10.dp)
@@ -250,7 +251,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                             .Builder(
                                 GoogleSignInOptions.DEFAULT_SIGN_IN
                             )
-                            //.requestIdToken(token)
+                            .requestIdToken(token)
                             .requestEmail()
                             .build()
                         val googleSignInCliente = GoogleSignIn.getClient(context, opciones)

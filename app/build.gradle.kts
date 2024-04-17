@@ -1,11 +1,8 @@
-import java.util.Properties
-
 plugins {
     id("com.android.application")
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.android")
-
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
@@ -24,11 +21,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
-        var properties:Properties = Properties()
-        properties.load(project.rootProject.file("local.properties").inputStream())
-
-        buildConfigField("String","TOKEN","\"${properties.getProperty("TOKEN")}\"")
     }
 
     buildTypes {
@@ -38,18 +30,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-
-            val secretsPropertiesFile = file("local.properties")
-            if (secretsPropertiesFile.exists()) {
-                val properties = Properties()
-                secretsPropertiesFile.inputStream().use { stream ->
-                    properties.load(stream)
-                }
-                // Agregar el token al archivo de recursos generados
-                buildConfigField("String", "TOKEN", "\"${properties.getProperty("TOKEN")}\"")
-            } else {
-                println("Archivo 'secrets.properties' no encontrado. Asegúrate de crearlo en el directorio 'app'.")
-            }
         }
     }
 
@@ -60,8 +40,11 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
     buildFeatures {
         compose = true
+        viewBinding = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
