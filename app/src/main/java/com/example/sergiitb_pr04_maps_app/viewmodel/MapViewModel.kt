@@ -23,7 +23,9 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -248,6 +250,10 @@ class MapViewModel : ViewModel() {
 
     fun updateMarker(editedMarker: MarkerSergi) {
         if (uriFoto.value != null) {
+            // Obtener la URL de la foto actual del marcador
+            val oldImageUrl = editedMarker.photoReference
+
+            // Subir la nueva imagen y actualizar el marcador
             uploadImage(uriFoto.value!!, editedMarker) { downloadUrl ->
                 // Actualizar la referencia de la foto en el marcador con la URL de descarga
                 editedMarker.modificarPhotoReference(downloadUrl)
@@ -267,6 +273,10 @@ class MapViewModel : ViewModel() {
                     )
                     .addOnSuccessListener {
                         println("Marker añadido correctamente a la base de datos")
+                        // Eliminar la foto anterior del almacenamiento si existe
+                        if (oldImageUrl != null) {
+                            deleteProfileImage(oldImageUrl)
+                        }
                         // Solicitar la lista completa de marcadores después de añadir uno nuevo
                         pillarTodosMarkers()
                     }
@@ -276,7 +286,8 @@ class MapViewModel : ViewModel() {
 
             }
         } else {
-            // Agregar el marcador a la base de datos con la referencia de la foto actualizada
+            // El caso cuando no hay una nueva imagen
+            // Agregar el marcador a la base de datos sin modificar la imagen
             database.collection("markers").document(editedMarker.markerId!!)
                 .set(
                     hashMapOf(
@@ -678,6 +689,9 @@ class MapViewModel : ViewModel() {
     }
 
     fun updateUser() {
+        getProfileImageUrlForUser()
+        val oldImageUrl = _imageUrlForUser.value // Guarda la URL de la imagen actual
+
         uploadImage(uriFoto.value!!) { downloadUrl ->
             // Realizar una consulta para encontrar el documento del usuario
             database.collection("user")
@@ -690,6 +704,11 @@ class MapViewModel : ViewModel() {
                         document.reference.update(data)
                             .addOnSuccessListener {
                                 println("Usuario actualizado correctamente en la base de datos")
+
+                                // Eliminar la imagen anterior del almacenamiento
+                                if (oldImageUrl != null) {
+                                    deleteProfileImage(oldImageUrl)
+                                }
                             }
                             .addOnFailureListener { e ->
                                 println("Error al actualizar el usuario en la base de datos: ${e.message}")
@@ -701,6 +720,23 @@ class MapViewModel : ViewModel() {
                     println("Error al consultar la base de datos: ${exception.message}")
                 }
         }
+    }
+
+    fun deleteProfileImage(imageUrl: String) {
+        // Obtener la referencia de Firebase Storage
+        val storageRef = Firebase.storage.reference
+
+        // Obtener la referencia de la imagen a eliminar usando la URL
+        val imageRef = storageRef.storage.getReferenceFromUrl(imageUrl)
+
+        // Eliminar la imagen
+        imageRef.delete()
+            .addOnSuccessListener {
+                println("Imagen anterior del perfil eliminada correctamente del almacenamiento")
+            }
+            .addOnFailureListener { e ->
+                println("Error al eliminar la imagen anterior del perfil del almacenamiento: ${e.message}")
+            }
     }
 
     fun signInWithGoogleCredential(credential: AuthCredential, home: () -> Unit) =
