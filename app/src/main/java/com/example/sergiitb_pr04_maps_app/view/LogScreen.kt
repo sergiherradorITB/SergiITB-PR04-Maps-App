@@ -68,7 +68,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnrememberedMutableState")
+@SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @Composable
 fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -88,6 +88,39 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
     val context = LocalContext.current
     val userPrefs = UserPrefs(context)
     val storedUserData = userPrefs.getUserData.collectAsState(initial = emptyList())
+    val token = BuildConfig.TOKEN
+
+    val launcher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+                mapViewModel.signInWithGoogleCredential(credential) {
+                    mapViewModel.modifyProcessing(true)
+                    navController.navigate(Routes.MapScreen.route)
+                }
+                if (account.email != null) mapViewModel.modificarLoggedUser(account.email!!)
+                if (permanecerLogged) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        userPrefs.saveUserData(mapViewModel.pillarLoggedUser(), "")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.d("MascotaFeliz", "GoogleSign failed")
+            }
+        }
+
+    val opciones = GoogleSignInOptions
+        .Builder(
+            GoogleSignInOptions.DEFAULT_SIGN_IN
+        )
+        .requestIdToken(token)
+        .requestEmail()
+        .build()
+    val googleSignInCliente = GoogleSignIn.getClient(context, opciones)
 
     if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != ""
         && storedUserData.value[1] != "" && validLogin
@@ -97,6 +130,10 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
         if (goToNext) {
             navController.navigate(Routes.MapScreen.route)
         }
+    } else if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != "") {
+        mapViewModel.modifyProcessing(false)
+        launcher.launch(googleSignInCliente.signInIntent)
+
     }
 
     if (!isLoading) {
@@ -223,39 +260,11 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                 }
             }
 
-            val launcher =
-                rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.StartActivityForResult()
-                ) {
-                    val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
-                    try {
-                        val account = task.getResult(ApiException::class.java)
-                        val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-                        mapViewModel.signInWithGoogleCredential(credential) {
-                            navController.navigate(Routes.MapScreen.route)
-                        }
-                        if (account.email != null) mapViewModel.modificarLoggedUser(account.email!!)
-
-                    } catch (e: Exception) {
-                        Log.d("MascotaFeliz", "GoogleSign failed")
-                    }
-                }
-
-            val token = BuildConfig.TOKEN
-
             Row(
                 modifier = Modifier
                     .padding(10.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .clickable {
-                        val opciones = GoogleSignInOptions
-                            .Builder(
-                                GoogleSignInOptions.DEFAULT_SIGN_IN
-                            )
-                            .requestIdToken(token)
-                            .requestEmail()
-                            .build()
-                        val googleSignInCliente = GoogleSignIn.getClient(context, opciones)
                         launcher.launch(googleSignInCliente.signInIntent)
                     },
                 verticalAlignment = CenterVertically,
@@ -268,7 +277,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                         .padding(10.dp)
                         .size(40.dp)
                 )
-                Text(text = "Login con Google", fontSize = 18.sp)
+                Text(text = "Login con Google", fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
             }
         }
         MyDialogPasswordOrEmail(
