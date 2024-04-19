@@ -1,7 +1,6 @@
 package com.example.sergiitb_pr04_maps_app.model
 
 import android.graphics.Bitmap
-import androidx.compose.ui.graphics.Color
 
 
 data class MarkerSergi(
@@ -15,7 +14,7 @@ data class MarkerSergi(
     var photo:Bitmap?,
     var photoReference:String?
 ){
-    constructor():this(null,null,0.0,0.0,"","",Categoria("",Color.Black),null,null)
+    constructor():this(null,null,0.0,0.0,"","",Categoria(""),null,null)
 
     // Método para modificar el título
     fun modificarTitle(newTitle: String) {

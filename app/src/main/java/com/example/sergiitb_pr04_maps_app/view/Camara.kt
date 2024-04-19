@@ -242,31 +242,6 @@ fun TakePhotoScreen(
 fun takePhoto(
     context: Context,
     mapViewModel: MapViewModel,
-    navigationController: NavController,
-    controller: LifecycleCameraController, onPhotoTaken: (Bitmap) -> Unit
-) {
-    controller.takePicture(
-        ContextCompat.getMainExecutor(context),
-        object : ImageCapture.OnImageCapturedCallback() {
-            override fun onCaptureSuccess(image: ImageProxy) {
-                super.onCaptureSuccess(image)
-                onPhotoTaken(image.toBitmap())
-                mapViewModel.modifyUriPhoto(bitmapToUri(context, image.toBitmap()))
-                navigationController.navigateUp() // Esta línea navega a la pantalla anterior                }
-
-            }
-
-            override fun onError(exception: ImageCaptureException) {
-                super.onError(exception)
-                Log.e("Camera", "Error taken photo", exception)
-            }
-        }
-    )
-}
-
-fun takePhoto(
-    context: Context,
-    mapViewModel: MapViewModel,
     controller: LifecycleCameraController, onPhotoTaken: (Bitmap) -> Unit
 ) {
     controller.takePicture(

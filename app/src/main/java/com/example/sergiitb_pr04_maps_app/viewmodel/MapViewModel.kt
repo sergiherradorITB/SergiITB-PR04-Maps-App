@@ -7,7 +7,6 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -246,9 +245,9 @@ class MapViewModel : ViewModel() {
         // Inicializar la lista de categorías si es necesario
         if (_categories.value == null) {
             _categories.value = mutableListOf(
-                Categoria("Info", Color.Green),
-                Categoria("Likes", Color.Yellow),
-                Categoria("Favoritos", Color.Cyan)
+                Categoria("Info"),
+                Categoria("Likes"),
+                Categoria("Favoritos")
             )
         }
     }
