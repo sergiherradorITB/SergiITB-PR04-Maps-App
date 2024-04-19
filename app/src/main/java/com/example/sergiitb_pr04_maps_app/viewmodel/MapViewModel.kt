@@ -85,7 +85,8 @@ class MapViewModel : ViewModel() {
     private var uriFoto = _uriFoto
 
     private val photoTaken = mutableStateOf(false)
-    private val showGuapo = mutableStateOf(false)
+    private val _showGuapo = MutableLiveData<Boolean>(false)
+    val showGuapo = _showGuapo
 
     private val _cameraPermissionGranted = MutableLiveData(false)
     val cameraPositionGranted = _cameraPermissionGranted
@@ -164,7 +165,7 @@ class MapViewModel : ViewModel() {
         showGuapo.value = newValue
     }
 
-    fun getShowGuapo(): Boolean {
+    fun getShowGuapo(): Boolean? {
         return showGuapo.value
     }
 
@@ -197,6 +198,17 @@ class MapViewModel : ViewModel() {
         return position
     }
 
+    private var _editingPosition = MutableLiveData<LatLng>()
+    val editingPosition = _editingPosition
+
+    fun modificarEditingPosition(newValue: LatLng){
+        _editingPosition.value = newValue
+    }
+
+    fun pillarEditingPosition(): LatLng? {
+        return _editingPosition.value
+    }
+
     // LiveData para la lista de marcadores
     private val _editingMarkers = MutableLiveData<MarkerSergi>()
     var editingMarkers: LiveData<MarkerSergi> = _editingMarkers
@@ -211,6 +223,10 @@ class MapViewModel : ViewModel() {
     private val _textoDropDown = MutableLiveData<String>()
     val textoDropdown: LiveData<String> = _textoDropDown
 
+    private val _textoDropDownCategorias = MutableLiveData<String>()
+    val textoDropdownCategoria: LiveData<String> = _textoDropDownCategorias
+
+
     private val _showBottomSheet = MutableLiveData<Boolean>()
     val showBottomSheet = _showBottomSheet
 
@@ -220,6 +236,10 @@ class MapViewModel : ViewModel() {
 
     fun modificarTextoDropdown(nuevoTexto: String) {
         _textoDropDown.value = nuevoTexto
+    }
+
+    fun modificarTextoDropdownCat(nuevoTexto: String) {
+        _textoDropDownCategorias.value = nuevoTexto
     }
 
     init {

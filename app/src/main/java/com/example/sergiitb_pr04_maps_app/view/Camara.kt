@@ -242,6 +242,31 @@ fun TakePhotoScreen(
 fun takePhoto(
     context: Context,
     mapViewModel: MapViewModel,
+    navigationController: NavController,
+    controller: LifecycleCameraController, onPhotoTaken: (Bitmap) -> Unit
+) {
+    controller.takePicture(
+        ContextCompat.getMainExecutor(context),
+        object : ImageCapture.OnImageCapturedCallback() {
+            override fun onCaptureSuccess(image: ImageProxy) {
+                super.onCaptureSuccess(image)
+                onPhotoTaken(image.toBitmap())
+                mapViewModel.modifyUriPhoto(bitmapToUri(context, image.toBitmap()))
+                navigationController.navigateUp() // Esta línea navega a la pantalla anterior                }
+
+            }
+
+            override fun onError(exception: ImageCaptureException) {
+                super.onError(exception)
+                Log.e("Camera", "Error taken photo", exception)
+            }
+        }
+    )
+}
+
+fun takePhoto(
+    context: Context,
+    mapViewModel: MapViewModel,
     controller: LifecycleCameraController, onPhotoTaken: (Bitmap) -> Unit
 ) {
     controller.takePicture(
@@ -260,7 +285,6 @@ fun takePhoto(
         }
     )
 }
-
 fun bitmapToUri(context: Context, bitmap: Bitmap): Uri? {
     val filename = "${System.currentTimeMillis()}.jpg"
     val values = ContentValues().apply {
@@ -291,4 +315,108 @@ fun CameraPreview(controller: LifecycleCameraController, modifier: Modifier = Mo
             controller.bindToLifecycle(lifecycleOwner)
         }
     }, modifier = modifier)
+}
+
+
+@Composable
+fun TakePhotoScreen(
+    navigationController: NavController,
+    mapViewModel: MapViewModel,
+) {
+    val context = LocalContext.current
+
+    val controller = remember {
+        LifecycleCameraController(context).apply {
+            CameraController.IMAGE_CAPTURE
+        }
+    }
+    val img: Bitmap? = ContextCompat.getDrawable(context, R.drawable.itb_bitmap)?.toBitmap()
+    var bitmap by remember { mutableStateOf(img) }
+
+    val launchImage = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = {
+            if (it != null) {
+                val uri = it
+
+                bitmap = if (Build.VERSION.SDK_INT < 28) {
+                    MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+                } else {
+                    val source = it.let { it1 ->
+                        ImageDecoder.createSource(context.contentResolver, it1)
+                    }
+                    source.let { it1 ->
+                        ImageDecoder.decodeBitmap(it1)
+                    }
+                }
+
+                mapViewModel.modifyUriPhoto(uri)
+                // Guardar la imagen en el ViewModel
+                bitmap?.let {
+                    mapViewModel.modifyPhotoBitmap(it)
+                    mapViewModel.modifyShowGuapo(false)
+                }
+                // mapViewModel.modifyShowGuapo(false)
+                mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
+                navigationController.navigate(Routes.MapScreen.route) // Esta línea navega a la pantalla anterior
+            } else {
+                // Manejar el caso donde no se selecciona una imagen
+                Toast.makeText(context, "No se seleccionó ninguna imagen", Toast.LENGTH_SHORT)
+                    .show()
+                mapViewModel.modifyShowGuapo(false)
+            }
+        })
+
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        CameraPreview(controller = controller, modifier = Modifier.fillMaxSize())
+        IconButton(
+            onClick = {
+                controller.cameraSelector =
+                    if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+                        CameraSelector.DEFAULT_FRONT_CAMERA
+                    } else {
+                        CameraSelector.DEFAULT_BACK_CAMERA
+                    }
+            },
+            modifier = Modifier.offset(
+                16.dp,
+                16.dp
+            )
+        ) {
+            Icon(imageVector = Icons.Default.Cameraswitch, contentDescription = "Switch Camera")
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            ) {
+                IconButton(
+                    onClick = {
+                        launchImage.launch("image/*")
+                    }
+                ) {
+                    Icon(imageVector = Icons.Default.Photo, contentDescription = "Open gallery")
+                }
+                IconButton(onClick = {
+                    takePhoto(context,mapViewModel,controller) { photo ->
+                        mapViewModel.modifyPhotoBitmap(photo)
+                        mapViewModel.modifyShowGuapo(false)
+                        mapViewModel.modifyPhotoTaken(true) // Actualizar el estado cuando se toma la foto
+                        navigationController.navigate(Routes.MapScreen.route) // Esta línea navega a la pantalla anterior
+                    }
+                }) {
+                    Icon(imageVector = Icons.Default.Camera, contentDescription = "Take photo")
+                }
+            }
+        }
+    }
 }

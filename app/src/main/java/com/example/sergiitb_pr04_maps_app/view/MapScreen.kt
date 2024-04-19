@@ -64,8 +64,9 @@ import kotlinx.coroutines.launch
 fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    var showBottomSheet by remember { mutableStateOf(false) }
+    val showBottomSheet by mapViewModel.showBottomSheet.observeAsState(initial = false)
     val marcadores by mapViewModel.markers.observeAsState(emptyList())
+    val texto: String by mapViewModel.textoDropdown.observeAsState("Mostrar Todos")
     mapViewModel.pillarTodosMarkers()
 
     if (!mapViewModel.userLogged()){
@@ -112,8 +113,6 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                             emptyList()
                         )
 
-                        var texto by remember { mutableStateOf("Selecciona que quieres mostrar") }
-
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -139,8 +138,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                     onClick = {
                                         mapViewModel.modifyExpandedMapa(false)
                                         mapViewModel.pillarTodosMarkers()
-                                        texto =
-                                            "Mostrar Todos" // Actualizar el texto al seleccionar la opción "Mostrar Todos"
+                                        mapViewModel.modificarTextoDropdown("Mostrar Todos")
                                     })
 
                                 // Opciones para las categorías
@@ -150,8 +148,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                         onClick = {
                                             mapViewModel.pillarTodosMarkersCategoria(categoria.name)
                                             mapViewModel.modifyExpandedMapa(false)
-                                            texto =
-                                                categoria.name // Actualizar el texto al seleccionar una categoría
+                                            mapViewModel.modificarTextoDropdown(categoria.name)
                                         })
                                 }
                             }
@@ -168,7 +165,8 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                 cameraPositionState = cameraPositionState,
                                 onMapLongClick = {
                                     mapViewModel.changePosition(it)
-                                    showBottomSheet = true
+                                    mapViewModel.modificarEditingPosition(it)
+                                    mapViewModel.modificarShowBottomSheet(true)
                                 },
                                 properties = MapProperties(
                                     isMyLocationEnabled = true,
@@ -183,19 +181,19 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                         // tonalElevation =  BottomSheetDefaults.SheetPeekHeight,
                                         // modifier = Modifier.fillMaxSize(),
                                         onDismissRequest = {
-                                            showBottomSheet = false
+                                            mapViewModel.modificarShowBottomSheet(false)
                                         },
                                         sheetState = sheetState
                                     ) {
-                                        resetearParametros(mapViewModel)
                                         AddMarkerScreen(
                                             mapViewModel = mapViewModel,
                                             navController,
                                             onCloseBottomSheet = {
+                                                resetearParametros(mapViewModel)
                                                 scope.launch { sheetState.hide() }
                                                     .invokeOnCompletion {
                                                         if (!sheetState.isVisible) {
-                                                            showBottomSheet = false
+                                                            mapViewModel.modificarShowBottomSheet(false)
                                                         }
                                                     }
                                             }
@@ -234,7 +232,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                     }
                     Button(
                         onClick = {
-                            showBottomSheet = true
+                            mapViewModel.modificarShowBottomSheet(true)
                         },
                         modifier = Modifier
                             .align(Alignment.BottomStart)

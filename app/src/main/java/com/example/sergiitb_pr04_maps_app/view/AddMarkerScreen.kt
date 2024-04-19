@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.sergiitb_pr04_maps_app.Routes
 import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
@@ -56,6 +56,10 @@ fun AddMarkerScreen(
     onCloseBottomSheet: () -> Unit
 ) {
     val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
+    val texto: String by mapViewModel.textoDropdownCategoria.observeAsState("Selecciona una categoría")
+
+    val showGuapo : Boolean by mapViewModel.showGuapo.observeAsState(false)
+
     val permissionState =
         rememberPermissionState(permission = Manifest.permission.CAMERA)
     Column(Modifier.fillMaxHeight(1f)) {
@@ -69,8 +73,10 @@ fun AddMarkerScreen(
         }
         if (permissionState.status.isGranted) {
             // Mostrar la vista de captura de foto si no se ha tomado ninguna foto
-            if (mapViewModel.getShowGuapo()) {
-                Box(modifier = Modifier.fillMaxSize()) {
+            if (showGuapo) {
+                navController.navigate(Routes.TakePhotoScreen.route)
+
+                /*Box(modifier = Modifier.fillMaxSize()) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxSize()
@@ -83,7 +89,7 @@ fun AddMarkerScreen(
                             mapViewModel.modifyShowGuapo(false)
                         }
                     }
-                }
+                }*/
             } else {
                 // Mostrar la vista de agregar marcador después de tomar una foto
                 Column(
@@ -128,7 +134,6 @@ fun AddMarkerScreen(
                         )
                     }
 
-                    var texto by remember { mutableStateOf("Selecciona una categoría") }
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Box(
@@ -155,8 +160,7 @@ fun AddMarkerScreen(
                                 DropdownMenuItem(text = { Text(text = categoria.name) }, onClick = {
                                     mapViewModel.modifySelectedCategory(categoria)
                                     mapViewModel.modifyExpanded(false)
-                                    texto =
-                                        categoria.name // Actualizar el texto al seleccionar una categoría
+                                    mapViewModel.modificarTextoDropdownCat(categoria.name)
                                 })
                             }
                         }
@@ -170,14 +174,14 @@ fun AddMarkerScreen(
                                 show = true
                             } else {
                                 val categoryToAdd = mapViewModel.getSelectedCategory()!!
-                                val latLng = mapViewModel.getPosition()
+                                val latLng = mapViewModel.pillarEditingPosition()
                                 val photo = mapViewModel.getPhotoBitmap()
                                 val markerToAdd =
                                     photo?.let {
                                         MarkerSergi(
                                             mapViewModel.pillarLoggedUser(),
                                             null,
-                                            latLng.latitude,
+                                            latLng!!.latitude,
                                             latLng.longitude,
                                             mapViewModel.getTitle(),
                                             mapViewModel.getSnippet(),
@@ -190,6 +194,9 @@ fun AddMarkerScreen(
                                     mapViewModel.addMarkerToDatabase(markerToAdd)
                                 }
                                 onCloseBottomSheet()
+                                resetearParametros(mapViewModel)
+                                mapViewModel.modificarTextoDropdownCat("Seleccionar Categoría")
+
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
