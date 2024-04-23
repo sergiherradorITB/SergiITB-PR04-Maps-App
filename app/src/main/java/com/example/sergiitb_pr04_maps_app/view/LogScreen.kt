@@ -325,7 +325,7 @@ fun MyDialogPasswordAuth(show: Boolean, emailProblem: Boolean, onDismiss: () -> 
             ) {
                 if (emailProblem) {
                     Text(
-                        text = "Email ya registrado!!",
+                        text = "Email ya registrado o Incorrecto!!",
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )

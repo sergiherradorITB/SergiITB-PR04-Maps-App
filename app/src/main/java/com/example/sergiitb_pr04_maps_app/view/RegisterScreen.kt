@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -66,28 +65,18 @@ fun RegisterScreen(navController: NavController, mapViewModel: MapViewModel) {
     val nombreState: String by mapViewModel.nombreState.observeAsState("")
     val apellidoState: String by mapViewModel.apellidoState.observeAsState("")
     val ciudadState: String by mapViewModel.ciudadState.observeAsState("")
-
-
     val showDialogPass: Boolean by mapViewModel.showDialogPass.observeAsState(false)
     val passwordProblem: Boolean by mapViewModel.passwordProblem.observeAsState(false)
     val showDialogAuth: Boolean by mapViewModel.showDialogAuth.observeAsState(false)
     val emailProblem: Boolean by mapViewModel.emailDuplicated.observeAsState(false)
-    val validLogin: Boolean by mapViewModel.validLogin.observeAsState(true)
     val passwordVisibility: Boolean by mapViewModel.passwordVisibility.observeAsState(false)
     val permanecerLogged: Boolean by mapViewModel.permanecerLogged.observeAsState(false)
 
     val context = LocalContext.current
     val userPrefs = UserPrefs(context)
-    val storedUserData = userPrefs.getUserData.collectAsState(initial = emptyList())
 
-    if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != ""
-        && storedUserData.value[1] != "" && validLogin
-    ) {
-        mapViewModel.modifyProcessing(false)
-        mapViewModel.login(storedUserData.value[0], storedUserData.value[1])
-        if (goToNext) {
-            navController.navigate(Routes.MapScreen.route)
-        }
+    if (goToNext) {
+        navController.navigate(Routes.MapScreen.route)
     }
 
     if (!isLoading) {

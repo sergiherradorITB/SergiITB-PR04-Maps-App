@@ -14,13 +14,16 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -67,157 +70,173 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
     val showBottomSheet by mapViewModel.showBottomSheet.observeAsState(initial = false)
     val marcadores by mapViewModel.markers.observeAsState(emptyList())
     val texto: String by mapViewModel.textoDropdown.observeAsState("Mostrar Todos")
+    val isLoading: Boolean by mapViewModel.isLoadingMarkers.observeAsState(initial = false)
     mapViewModel.pillarTodosMarkers()
 
-    if (!mapViewModel.userLogged()){
+    if (!mapViewModel.userLogged()) {
         mapViewModel.signOut(context = LocalContext.current, navController)
     }
 
-    MyDrawer(
-        navController = navController,
-        mapViewModel = mapViewModel,
-        content = {
-            val permissionState =
-                rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
-            LaunchedEffect(Unit) {
-                permissionState.launchPermissionRequest()
-            }
-
-            if (permissionState.status.isGranted) {
-                val context = LocalContext.current
-                val fusedLocationProviderClient =
-                    remember { LocationServices.getFusedLocationProviderClient(context) }
-                var lastKnownLocation by remember { mutableStateOf<Location?>(null) }
-                var deviceLatLng by remember { mutableStateOf(LatLng(0.0, 0.0)) }
-                val cameraPositionState =
-                    rememberCameraPositionState {
-                        position = CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
-                    }
-
-                val locationResult = fusedLocationProviderClient.getCurrentLocation(100, null)
-                locationResult.addOnCompleteListener(context as MainActivity) { task ->
-                    if (task.isSuccessful) {
-                        lastKnownLocation = task.result
-                        deviceLatLng =
-                            LatLng(lastKnownLocation!!.latitude, lastKnownLocation!!.longitude)
-                        cameraPositionState.position =
-                            CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
-                        mapViewModel.changePosition(deviceLatLng)
-                    } else {
-                        Log.e("Error", "Exception: %s", task.exception)
-                    }
+    if (!isLoading) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.width(64.dp),
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+    } else {
+        MyDrawer(
+            navController = navController,
+            mapViewModel = mapViewModel,
+            content = {
+                val permissionState =
+                    rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
+                LaunchedEffect(Unit) {
+                    permissionState.launchPermissionRequest()
                 }
-                Box {
-                    Column {
-                        val categories: List<Categoria> by mapViewModel.categories.observeAsState(
-                            emptyList()
-                        )
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            OutlinedTextField(
-                                value = texto,
-                                onValueChange = { /* No permitimos cambios directos aquí */ },
-                                enabled = false,
-                                readOnly = true,
-                                modifier = Modifier
-                                    .clickable { mapViewModel.modifyExpandedMapa(true) }
-                                    .fillMaxWidth()
-                            )
-
-                            DropdownMenu(
-                                expanded = mapViewModel.pillarExpandedMapa(),
-                                onDismissRequest = { mapViewModel.modifyExpandedMapa(false) },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                // Opción para mostrar todos los marcadores
-                                DropdownMenuItem(
-                                    text = { Text(text = "Mostrar Todos") },
-                                    onClick = {
-                                        mapViewModel.modifyExpandedMapa(false)
-                                        mapViewModel.pillarTodosMarkers()
-                                        mapViewModel.modificarTextoDropdown("Mostrar Todos")
-                                    })
-
-                                // Opciones para las categorías
-                                categories.forEach { categoria ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = categoria.name) },
-                                        onClick = {
-                                            mapViewModel.pillarTodosMarkersCategoria(categoria.name)
-                                            mapViewModel.modifyExpandedMapa(false)
-                                            mapViewModel.modificarTextoDropdown(categoria.name)
-                                        })
-                                }
-                            }
+                if (permissionState.status.isGranted) {
+                    val context = LocalContext.current
+                    val fusedLocationProviderClient =
+                        remember { LocationServices.getFusedLocationProviderClient(context) }
+                    var lastKnownLocation by remember { mutableStateOf<Location?>(null) }
+                    var deviceLatLng by remember { mutableStateOf(LatLng(0.0, 0.0)) }
+                    val cameraPositionState =
+                        rememberCameraPositionState {
+                            position = CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
                         }
 
-
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.Bottom,
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            GoogleMap(
-                                modifier = Modifier.fillMaxHeight(),
-                                cameraPositionState = cameraPositionState,
-                                onMapLongClick = {
-                                    mapViewModel.changePosition(it)
-                                    mapViewModel.modificarEditingPosition(it)
-                                    mapViewModel.modificarShowBottomSheet(true)
-                                },
-                                properties = MapProperties(
-                                    isMyLocationEnabled = true,
-                                    isIndoorEnabled = true,
-                                    isBuildingEnabled = true,
-                                    isTrafficEnabled = true
-                                )
+                    val locationResult = fusedLocationProviderClient.getCurrentLocation(100, null)
+                    locationResult.addOnCompleteListener(context as MainActivity) { task ->
+                        if (task.isSuccessful) {
+                            lastKnownLocation = task.result
+                            deviceLatLng =
+                                LatLng(lastKnownLocation!!.latitude, lastKnownLocation!!.longitude)
+                            cameraPositionState.position =
+                                CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
+                            mapViewModel.changePosition(deviceLatLng)
+                        } else {
+                            Log.e("Error", "Exception: %s", task.exception)
+                        }
+                    }
+                    Box {
+                        Column {
+                            val categories: List<Categoria> by mapViewModel.categories.observeAsState(
+                                emptyList()
                             )
-                            {
-                                if (showBottomSheet) {
-                                    ModalBottomSheet(
-                                        // tonalElevation =  BottomSheetDefaults.SheetPeekHeight,
-                                        // modifier = Modifier.fillMaxSize(),
-                                        onDismissRequest = {
-                                            mapViewModel.modificarShowBottomSheet(false)
-                                        },
-                                        sheetState = sheetState
-                                    ) {
-                                        AddMarkerScreen(
-                                            mapViewModel = mapViewModel,
-                                            navController,
-                                            onCloseBottomSheet = {
-                                                resetearParametros(mapViewModel)
-                                                scope.launch { sheetState.hide() }
-                                                    .invokeOnCompletion {
-                                                        if (!sheetState.isVisible) {
-                                                            mapViewModel.modificarShowBottomSheet(false)
-                                                        }
-                                                    }
-                                            }
-                                        )
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                OutlinedTextField(
+                                    value = texto,
+                                    onValueChange = { /* No permitimos cambios directos aquí */ },
+                                    enabled = false,
+                                    readOnly = true,
+                                    modifier = Modifier
+                                        .clickable { mapViewModel.modifyExpandedMapa(true) }
+                                        .fillMaxWidth()
+                                )
+
+                                DropdownMenu(
+                                    expanded = mapViewModel.pillarExpandedMapa(),
+                                    onDismissRequest = { mapViewModel.modifyExpandedMapa(false) },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    // Opción para mostrar todos los marcadores
+                                    DropdownMenuItem(
+                                        text = { Text(text = "Mostrar Todos") },
+                                        onClick = {
+                                            mapViewModel.modifyExpandedMapa(false)
+                                            mapViewModel.pillarTodosMarkers()
+                                            mapViewModel.modificarTextoDropdown("Mostrar Todos")
+                                        })
+
+                                    // Opciones para las categorías
+                                    categories.forEach { categoria ->
+                                        DropdownMenuItem(
+                                            text = { Text(text = categoria.name) },
+                                            onClick = {
+                                                mapViewModel.pillarTodosMarkersCategoria(categoria.name)
+                                                mapViewModel.modifyExpandedMapa(false)
+                                                mapViewModel.modificarTextoDropdown(categoria.name)
+                                            })
                                     }
                                 }
+                            }
 
-                                marcadores.forEach { marker ->
-                                    Marker(
-                                        state = MarkerState(
-                                            LatLng(
-                                                marker.latitude,
-                                                marker.longitude
+
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.Bottom,
+                                horizontalAlignment = Alignment.Start
+                            ) {
+                                GoogleMap(
+                                    modifier = Modifier.fillMaxHeight(),
+                                    cameraPositionState = cameraPositionState,
+                                    onMapLongClick = {
+                                        mapViewModel.changePosition(it)
+                                        mapViewModel.modificarEditingPosition(it)
+                                        mapViewModel.modificarShowBottomSheet(true)
+                                    },
+                                    properties = MapProperties(
+                                        isMyLocationEnabled = true,
+                                        isIndoorEnabled = true,
+                                        isBuildingEnabled = true,
+                                        isTrafficEnabled = true
+                                    )
+                                )
+                                {
+                                    if (showBottomSheet) {
+                                        ModalBottomSheet(
+                                            // tonalElevation =  BottomSheetDefaults.SheetPeekHeight,
+                                            // modifier = Modifier.fillMaxSize(),
+                                            onDismissRequest = {
+                                                mapViewModel.modificarShowBottomSheet(false)
+                                            },
+                                            sheetState = sheetState
+                                        ) {
+                                            AddMarkerScreen(
+                                                mapViewModel = mapViewModel,
+                                                navController,
+                                                onCloseBottomSheet = {
+                                                    resetearParametros(mapViewModel)
+                                                    scope.launch { sheetState.hide() }
+                                                        .invokeOnCompletion {
+                                                            if (!sheetState.isVisible) {
+                                                                mapViewModel.modificarShowBottomSheet(
+                                                                    false
+                                                                )
+                                                            }
+                                                        }
+                                                }
                                             )
-                                        ), // no los muestra en la posicion D:
-                                        title = marker.title,
-                                        snippet = marker.snippet,
-                                        icon = BitmapDescriptorFactory.defaultMarker(
-                                            when (marker.category.name) {
-                                                "Favoritos" -> BitmapDescriptorFactory.HUE_CYAN
-                                                "Likes" -> BitmapDescriptorFactory.HUE_YELLOW
-                                                "Info" -> BitmapDescriptorFactory.HUE_GREEN
-                                                else -> BitmapDescriptorFactory.HUE_RED
-                                            })
+                                        }
+                                    }
+
+                                    marcadores.forEach { marker ->
+                                        Marker(
+                                            state = MarkerState(
+                                                LatLng(
+                                                    marker.latitude,
+                                                    marker.longitude
+                                                )
+                                            ), // no los muestra en la posicion D:
+                                            title = marker.title,
+                                            snippet = marker.snippet,
+                                            icon = BitmapDescriptorFactory.defaultMarker(
+                                                when (marker.category.name) {
+                                                    "Favoritos" -> BitmapDescriptorFactory.HUE_CYAN
+                                                    "Likes" -> BitmapDescriptorFactory.HUE_YELLOW
+                                                    "Info" -> BitmapDescriptorFactory.HUE_GREEN
+                                                    else -> BitmapDescriptorFactory.HUE_RED
+                                                }
+                                            )
                                             /* SI PONGO YO LAS FOTOS SALEN GIGANTES.fromResource(
                                             when (marker.category.name) {
                                                 "Favoritos" -> R.drawable.uwu
@@ -225,29 +244,30 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                                 "Info" -> R.drawable.informarker
                                                 else -> R.drawable.uwu
                                             } */
-                                    )
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
-                    Button(
-                        onClick = {
-                            mapViewModel.modificarShowBottomSheet(true)
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(start = 16.dp, bottom = 33.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Filled.Add, contentDescription = null) // Icono
+                        Button(
+                            onClick = {
+                                mapViewModel.modificarShowBottomSheet(true)
+                            },
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(start = 16.dp, bottom = 33.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Filled.Add, contentDescription = null) // Icono
+                            }
                         }
                     }
+                } else {
+                    // Text(text = "Need permision")
+                    PermissionDeclinedScreenMap()
                 }
-            } else {
-                // Text(text = "Need permision")
-                PermissionDeclinedScreenMap()
-            }
-        })
+            })
+    }
 }
 
 @Composable

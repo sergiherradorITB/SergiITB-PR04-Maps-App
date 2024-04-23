@@ -263,9 +263,10 @@ class MapViewModel : ViewModel() {
 
     fun updateMarker(editedMarker: MarkerSergi) {
         if (uriFoto.value != null) {
+            modifyLoadingMarkers(false)
+
             // Obtener la URL de la foto actual del marcador
             val oldImageUrl = editedMarker.photoReference
-
             // Subir la nueva imagen y actualizar el marcador
             uploadImage(uriFoto.value!!) { downloadUrl ->
                 // Actualizar la referencia de la foto en el marcador con la URL de descarga
@@ -285,16 +286,19 @@ class MapViewModel : ViewModel() {
                         )
                     )
                     .addOnSuccessListener {
-                        println("Marker añadido correctamente a la base de datos")
+                        Log.d("Success",("Marker añadido correctamente a la base de datos"))
                         // Eliminar la foto anterior del almacenamiento si existe
                         if (oldImageUrl != null) {
                             deleteProfileImage(oldImageUrl)
                         }
                         // Solicitar la lista completa de marcadores después de añadir uno nuevo
                         pillarTodosMarkers()
+                        modifyLoadingMarkers(true)
+
                     }
                     .addOnFailureListener { e ->
-                        println("Error al añadir el marker a la base de datos: ${e.message}")
+                        Log.d("Error",("Error al añadir el marker a la base de datos: ${e.message}"))
+                        modifyLoadingMarkers(true)
                     }
 
             }
@@ -314,12 +318,14 @@ class MapViewModel : ViewModel() {
                     )
                 )
                 .addOnSuccessListener {
-                    println("Marker añadido correctamente a la base de datos")
+                    Log.d("Success",("Marker añadido correctamente a la base de datos"))
                     // Solicitar la lista completa de marcadores después de añadir uno nuevo
                     pillarTodosMarkers()
+                    modifyLoadingMarkers(true)
                 }
                 .addOnFailureListener { e ->
-                    println("Error al añadir el marker a la base de datos: ${e.message}")
+                    Log.d("Error",("Error al añadir el marker a la base de datos: ${e.message}"))
+                    modifyLoadingMarkers(true)
                 }
         }
     }
@@ -343,40 +349,44 @@ class MapViewModel : ViewModel() {
                     )
                 )
                 .addOnSuccessListener {
-                    println("Marker añadido correctamente a la base de datos")
+                    Log.d("Success",("Marker añadido correctamente a la base de datos"))
                     // Solicitar la lista completa de marcadores después de añadir uno nuevo
                     pillarTodosMarkers()
+                    modifyLoadingMarkers(true)
                 }
                 .addOnFailureListener { e ->
-                    println("Error al añadir el marker a la base de datos: ${e.message}")
+                    Log.d("Error",("Error al añadir el marker a la base de datos: ${e.message}"))
                 }
         }
     }
 
     private fun uploadImage(imageUri: Uri, onComplete: (String) -> Unit) {
-        println("XAVI UWU")
+        Log.d("Inicio",("XAVI UWU"))
         val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault())
         val now = Date()
         val fileName = formatter.format(now)
         val storage = FirebaseStorage.getInstance().getReference("images/$fileName")
+        modifyLoadingMarkers(false)
 
         storage.putFile(imageUri)
             .addOnSuccessListener { uploadTask ->
                 Log.i("IMAGE UPLOAD", "Image uploaded successfully")
-                println("Xavi peruano fino")
+                Log.d("Success",("Xavi peruano fino"))
                 uploadTask.storage.downloadUrl.addOnSuccessListener { uri ->
                     val downloadUrl = uri.toString()
-                    println("URL de descarga de la imagen: $downloadUrl")
+                    Log.d("Success",("URL de descarga de la imagen: $downloadUrl"))
                     onComplete(downloadUrl) // Llamar a la funcion que le pasamos, en este caso le pasamos la de añadir marcador a la bbdd
                 }
             }
             .addOnFailureListener {
                 Log.i("IMAGE UPLOAD", "Image upload failed")
-                println("Xavi peruano malo")
+                Log.d("Error",("Xavi peruano malo"))
+                modifyLoadingMarkers(true)
             }
     }
 
     fun pillarTodosMarkers() {
+        //modifyLoadingMarkers(false)
         repository.getMarkers()
             .whereEqualTo("owner", _loggedUser.value)
             .addSnapshotListener { value, error ->
@@ -396,11 +406,12 @@ class MapViewModel : ViewModel() {
                         newMarker.category.name = dc.document.get("categoryName").toString()
                         newMarker.photoReference = dc.document.get("linkImage").toString()
                         tempList.add(newMarker)
-                        println("Adios :( $newMarker")
+                        Log.d("Success",("Adios :( $newMarker"))
                     }
 
                 }
                 _markers.value = tempList
+                // modifyLoadingMarkers(true)
             }
     }
 
@@ -425,7 +436,7 @@ class MapViewModel : ViewModel() {
                         newMarker.category.name = dc.document.get("categoryName").toString()
                         newMarker.photoReference = dc.document.get("linkImage").toString()
                         tempList.add(newMarker)
-                        println("Adios :( " + newMarker.category.name)
+                        Log.d("Success",("Adios :( " + newMarker.category.name))
                     }
 
                 }
@@ -457,6 +468,12 @@ class MapViewModel : ViewModel() {
     private val _isLoading = MutableLiveData(true)
     val isLoading = _isLoading
 
+    private val _isLoadingMarkers = MutableLiveData(true)
+    val isLoadingMarkers = _isLoadingMarkers
+
+    fun modifyLoadingMarkers(newValue: Boolean){
+        _isLoadingMarkers.value = newValue
+    }
     // LiveData para emailState
     private val _emailState = MutableLiveData<String>()
     val emailState: LiveData<String> = _emailState
@@ -534,6 +551,8 @@ class MapViewModel : ViewModel() {
         auth.createUserWithEmailAndPassword(username, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    _userId.value = task.result.user?.uid
+                    _loggedUser.value = task.result.user?.email
                     _goToNext.value = true
                     modifyProcessing(false)
                     CoroutineScope(Dispatchers.IO).launch {
@@ -630,9 +649,16 @@ class MapViewModel : ViewModel() {
 
         val userPrefs = UserPrefs(context)
 
-        CoroutineScope(Dispatchers.IO).launch {
-            userPrefs.deleteUserData()
+        if (_permanecerLogged.value == true){
+            CoroutineScope(Dispatchers.IO).launch {
+                userPrefs.deleteUserPass()
+            }
+        } else {
+            CoroutineScope(Dispatchers.IO).launch {
+                userPrefs.deleteUserData()
+            }
         }
+
 
         auth.signOut()
 
@@ -647,6 +673,9 @@ class MapViewModel : ViewModel() {
     private val _imageUrlForUser = MutableLiveData<String>()
     val imageUrlForUser = _imageUrlForUser
 
+    private val _nombreUsuario = MutableLiveData<String>()
+    val nombreUsuario = _nombreUsuario
+
     fun getProfileImageUrlForUser() {
         repository.getUserImageUri()
             .whereEqualTo("owner", _loggedUser.value)
@@ -659,16 +688,18 @@ class MapViewModel : ViewModel() {
                 var tempString =
                     "https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1"
 
+                var tempStringNombre = "¿?"
                 if (value != null) {
                     for (dc: DocumentChange in value.documentChanges) {
                         if (dc.type == DocumentChange.Type.ADDED) {
                             tempString = dc.document.getString("image") ?: tempString
-                            println("Un peruano encontrado")
-                            println(tempString)
+                            tempStringNombre = dc.document.getString("name") ?: tempString
+                            Log.d("Success",("Un peruano encontrado"))
+                            Log.d("Success",(tempString))
                         }
                     }
                 }
-
+                _nombreUsuario.value = tempStringNombre
                 _imageUrlForUser.value = tempString
             }
     }
@@ -688,7 +719,7 @@ class MapViewModel : ViewModel() {
                         val data = mutableMapOf<String, Any>("image" to downloadUrl)
                         document.reference.update(data)
                             .addOnSuccessListener {
-                                println("Usuario actualizado correctamente en la base de datos")
+                                Log.d("Success",("Usuario actualizado correctamente en la base de datos"))
 
                                 // Eliminar la imagen anterior del almacenamiento
                                 if (oldImageUrl != null) {
@@ -696,13 +727,13 @@ class MapViewModel : ViewModel() {
                                 }
                             }
                             .addOnFailureListener { e ->
-                                println("Error al actualizar el usuario en la base de datos: ${e.message}")
+                                Log.d("Error",("Error al actualizar el usuario en la base de datos: ${e.message}"))
                             }
                     }
                     getProfileImageUrlForUser()
                 }
                 .addOnFailureListener { exception ->
-                    println("Error al consultar la base de datos: ${exception.message}")
+                    Log.d("Error",("Error al consultar la base de datos: ${exception.message}"))
                 }
         }
     }
@@ -717,10 +748,10 @@ class MapViewModel : ViewModel() {
         // Eliminar la imagen
         imageRef.delete()
             .addOnSuccessListener {
-                println("Imagen anterior del perfil eliminada correctamente del almacenamiento")
+                Log.d("Success",("Imagen anterior del perfil eliminada correctamente del almacenamiento"))
             }
             .addOnFailureListener { e ->
-                println("Error al eliminar la imagen anterior del perfil del almacenamiento: ${e.message}")
+                Log.d("Error",("Error al eliminar la imagen anterior del perfil del almacenamiento: ${e.message}"))
             }
     }
 
@@ -731,7 +762,7 @@ class MapViewModel : ViewModel() {
                 auth.signInWithCredential(credential)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Log.d("MascotaFeliz", "Log con exito")
+                            Log.d("Success", "Log con exito")
                             val userRef =
                                 database.collection("user").whereEqualTo("owner", _loggedUser.value)
                             userRef.get()
@@ -742,7 +773,7 @@ class MapViewModel : ViewModel() {
                                             .add(
                                                 hashMapOf(
                                                     "owner" to _loggedUser.value,
-                                                    // "name" to _nombreState.value,
+                                                    "name" to (_loggedUser.value?.split("@")?.get(0) ?: ""),
                                                     // "apellido" to _apellidoState.value,
                                                     // "ciudad" to _ciudadState.value,
                                                     // "password" to usuari.password (es logico guardar la contraseña rarete, no?)
@@ -754,10 +785,10 @@ class MapViewModel : ViewModel() {
                         }
                     }
                     .addOnFailureListener {
-                        Log.d("MascotaFeliz", "Fallo al loguear")
+                        Log.d("Error", "Fallo al loguear")
                     }
             } catch (ex: Exception) {
-                Log.d("MascotaFeliz", "Excepción al hacer log" + ex.localizedMessage)
+                Log.d("ExcepcionGoogle", "Excepción al hacer log" + ex.localizedMessage)
             }
         }
 }

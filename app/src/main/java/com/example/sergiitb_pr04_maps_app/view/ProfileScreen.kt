@@ -33,7 +33,8 @@ fun ProfileScreen(navController: NavController, mapViewModel: MapViewModel) {
     MyDrawer(navController = navController, mapViewModel = mapViewModel) {
         val imageUrl: String by mapViewModel.imageUrlForUser.observeAsState("https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1")
         val loggedUser: String by mapViewModel.loggedUser.observeAsState("")
-        val userName = loggedUser.split("@")[0]
+        val userName = loggedUser
+        val nombre:String by mapViewModel.nombreUsuario.observeAsState(initial = "")
         mapViewModel.getProfileImageUrlForUser()
 
         if (!mapViewModel.userLogged()){
@@ -59,11 +60,15 @@ fun ProfileScreen(navController: NavController, mapViewModel: MapViewModel) {
                 modifier = Modifier.fillMaxSize()
             ) {
                 Text(
-                    text = "User: $userName",
+                    text = "Gmail: $userName",
                     fontSize = 20.sp,
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
-
+                Text(
+                    text = "User: $nombre",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
                 Box(
                     modifier = Modifier
                         .padding(top = 10.dp)
@@ -92,7 +97,9 @@ fun ProfileScreen(navController: NavController, mapViewModel: MapViewModel) {
                     onClick = {
                         mapViewModel.modificarShowTakePhotoScreen(true)
                     },
-                    modifier = Modifier.fillMaxWidth(0.8f).padding(top=20.dp)
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .padding(top = 20.dp)
                 ) {
                     Text("Edit Photo")
                 }
@@ -103,7 +110,9 @@ fun ProfileScreen(navController: NavController, mapViewModel: MapViewModel) {
                         //mapViewModel.getProfileImageUrlForUser()
                         //navController.navigate(Routes.ProfileScreen.route)
                     },
-                    modifier = Modifier.fillMaxWidth(0.8f).padding(top=5.dp)
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .padding(top = 5.dp)
                 ) {
                     Text("Save Changes")
                 }
