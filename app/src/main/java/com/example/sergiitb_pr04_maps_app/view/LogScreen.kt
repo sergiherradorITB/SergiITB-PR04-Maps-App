@@ -113,6 +113,10 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
             }
         }
 
+    if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != ""){
+        mapViewModel.modificarEmailState(storedUserData.value[0])
+    }
+
     val opciones = GoogleSignInOptions
         .Builder(
             GoogleSignInOptions.DEFAULT_SIGN_IN
@@ -130,11 +134,11 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
         if (goToNext) {
             navController.navigate(Routes.MapScreen.route)
         }
-    } else if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != "") {
+    } /*else if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != "" && storedUserData.value[1] != "") {
         mapViewModel.modifyProcessing(false)
         launcher.launch(googleSignInCliente.signInIntent)
-
     }
+    */
 
     if (!isLoading) {
         Column(
