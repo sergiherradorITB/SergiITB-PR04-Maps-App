@@ -185,7 +185,7 @@ fun ListMarkersScreen(navController: NavController, mapViewModel: MapViewModel) 
                                                 mapViewModel.modificarShowBottomSheet(false)
                                             }
                                         }
-                                }
+                                }, false
                             )
                         }
                     }
@@ -234,17 +234,17 @@ fun LocationItem(
         Box(
             modifier = Modifier.fillMaxSize() // Modificador para que el contenido ocupe todo el espacio en la caja
         ) {
-            if (marker.photoReference == ""){
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.width(64.dp),
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
+            if (marker.photoReference == "") {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.width(64.dp),
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
 
             } else {
                 GlideImage(

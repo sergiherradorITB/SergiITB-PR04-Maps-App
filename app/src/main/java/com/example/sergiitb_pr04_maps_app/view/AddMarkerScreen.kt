@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -53,18 +54,19 @@ import com.google.accompanist.permissions.rememberPermissionState
 fun AddMarkerScreen(
     mapViewModel: MapViewModel,
     navController: NavController,
-    onCloseBottomSheet: () -> Unit
+    onCloseBottomSheet: () -> Unit,
+    estoyListScreen: Boolean
 ) {
     val categories: List<Categoria> by mapViewModel.categories.observeAsState(emptyList())
     val texto: String by mapViewModel.textoDropdownCategoria.observeAsState("Selecciona una categoría")
 
-    val showGuapo : Boolean by mapViewModel.showGuapo.observeAsState(false)
+    val showGuapo: Boolean by mapViewModel.showGuapo.observeAsState(false)
 
     val permissionState =
         rememberPermissionState(permission = Manifest.permission.CAMERA)
     Column(Modifier.fillMaxHeight(1f)) {
 
-        if (!mapViewModel.userLogged()){
+        if (!mapViewModel.userLogged()) {
             mapViewModel.signOut(context = LocalContext.current, navController)
         }
 
@@ -74,22 +76,24 @@ fun AddMarkerScreen(
         if (permissionState.status.isGranted) {
             // Mostrar la vista de captura de foto si no se ha tomado ninguna foto
             if (showGuapo) {
-                navController.navigate(Routes.TakePhotoScreen.route)
-
-                /*Box(modifier = Modifier.fillMaxSize()) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        TakePhotoScreen(
-                            mapViewModel = mapViewModel
-                        ) { photo ->
-                            // Aquí puedes manejar la foto capturada, por ejemplo, actualizar el estado o realizar otras acciones necesarias
-                            mapViewModel.modifyPhotoBitmap(photo)
-                            mapViewModel.modifyShowGuapo(false)
+                if (estoyListScreen) {
+                    navController.navigate(Routes.TakePhotoScreen.route)
+                } else {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            TakePhotoScreen(
+                                mapViewModel = mapViewModel
+                            ) { photo ->
+                                // Aquí puedes manejar la foto capturada, por ejemplo, actualizar el estado o realizar otras acciones necesarias
+                                mapViewModel.modifyPhotoBitmap(photo)
+                                mapViewModel.modifyShowGuapo(false)
+                            }
                         }
                     }
-                }*/
+                }
             } else {
                 // Mostrar la vista de agregar marcador después de tomar una foto
                 Column(
@@ -99,7 +103,7 @@ fun AddMarkerScreen(
                 ) {
                     TextField(
                         value = mapViewModel.getTitle(),
-                        onValueChange = { mapViewModel.modifyTitle(it)},
+                        onValueChange = { mapViewModel.modifyTitle(it) },
                         label = { Text("Title") },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -125,7 +129,7 @@ fun AddMarkerScreen(
                     val photoBitmap = mapViewModel.getPhotoBitmap()
                     if (photoBitmap != null) {
                         Image(
-                            bitmap = photoBitmap.asImageBitmap(),contentDescription = null,
+                            bitmap = photoBitmap.asImageBitmap(), contentDescription = null,
                             contentScale = ContentScale.Crop, modifier = Modifier
                                 .clip(CircleShape)
                                 .size(250.dp)

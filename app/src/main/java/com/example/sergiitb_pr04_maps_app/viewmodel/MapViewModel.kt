@@ -648,12 +648,13 @@ class MapViewModel : ViewModel() {
     fun signOut(context: Context, navController: NavController) {
 
         val userPrefs = UserPrefs(context)
-
         if (_permanecerLogged.value == true){
             CoroutineScope(Dispatchers.IO).launch {
+                println("JEJE ESTOY EN TRUE")
                 userPrefs.deleteUserPass()
             }
         } else {
+            modificarEmailState("")
             CoroutineScope(Dispatchers.IO).launch {
                 userPrefs.deleteUserData()
             }

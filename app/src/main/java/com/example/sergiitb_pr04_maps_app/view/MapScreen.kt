@@ -119,6 +119,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                             cameraPositionState.position =
                                 CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
                             mapViewModel.changePosition(deviceLatLng)
+                            mapViewModel.modificarEditingPosition(deviceLatLng)
                         } else {
                             Log.e("Error", "Exception: %s", task.exception)
                         }
@@ -214,7 +215,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                                                                 )
                                                             }
                                                         }
-                                                }
+                                                },true
                                             )
                                         }
                                     }
