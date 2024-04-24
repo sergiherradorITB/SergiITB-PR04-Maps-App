@@ -184,6 +184,9 @@ fun MyDrawer(
                                 mapViewModel.signOut(context, navController)
                             } else {
                                 navController.navigate(screen.route)
+                                mapViewModel.modificarTextoDropdownCat("Mostrar Todos")
+                                mapViewModel.modificarTextoDropdown("Mostrar Todos")
+
                                 scope.launch { state.close() }
                             }
                         }
@@ -252,6 +255,8 @@ fun MyTopAppBar(mapViewModel: MapViewModel, state: DrawerState, navController: N
             IconButton(
                 onClick = {
                     navController.navigate(Routes.MapScreen.route)
+                    mapViewModel.modificarTextoDropdownCat("Mostrar Todos")
+                    mapViewModel.modificarTextoDropdown("Mostrar Todos")
                 },
             ) {
                 Icon(
