@@ -151,7 +151,7 @@ fun MyDrawer(
 
                 Box(
                     modifier = Modifier
-                        .padding(top = 10.dp)
+                        .padding(top = 20.dp)
                         .size(200.dp)
                         .clip(CircleShape) // Clip con CircleShape
                 ) {

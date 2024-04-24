@@ -206,7 +206,7 @@ class MapViewModel : ViewModel() {
     private var _editingPosition = MutableLiveData<LatLng>()
     val editingPosition = _editingPosition
 
-    fun modificarEditingPosition(newValue: LatLng){
+    fun modificarEditingPosition(newValue: LatLng?){
         _editingPosition.value = newValue
     }
 
@@ -631,7 +631,7 @@ class MapViewModel : ViewModel() {
                                             "name" to _nombreState.value,
                                             "apellido" to _apellidoState.value,
                                             "ciudad" to _ciudadState.value,
-                                            // "password" to usuari.password (es logico guardar la contraseña rarete, no?)
+                                            // "password" to usuari.password (No es ético guardar la contraseña rarete, no?)
                                         )
                                     )
                             }

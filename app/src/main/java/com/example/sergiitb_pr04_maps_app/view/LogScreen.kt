@@ -113,7 +113,7 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
             }
         }
 
-    if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != ""){
+    if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != "") {
         mapViewModel.modificarEmailState(storedUserData.value[0])
     }
 
@@ -281,7 +281,11 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
                         .padding(10.dp)
                         .size(40.dp)
                 )
-                Text(text = "Login con Google", fontSize = 18.sp, modifier = Modifier.padding(end = 10.dp))
+                Text(
+                    text = "Login con Google",
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(end = 10.dp)
+                )
             }
         }
         MyDialogPasswordOrEmail(
@@ -291,8 +295,10 @@ fun LoginScreen(navController: NavController, mapViewModel: MapViewModel) {
 
         MyDialogPasswordAuth(
             showDialogAuth,
-            emailProblem
+            emailProblem,
+            userPrefs
         ) { mapViewModel.modificarShowDialogAuth(false) }
+
     }
 }
 
@@ -317,8 +323,14 @@ fun MyDialogPasswordOrEmail(show: Boolean, password: Boolean, onDismiss: () -> U
     }
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun MyDialogPasswordAuth(show: Boolean, emailProblem: Boolean, onDismiss: () -> Unit) {
+fun MyDialogPasswordAuth(
+    show: Boolean,
+    emailProblem: Boolean,
+    userPrefs: UserPrefs,
+    onDismiss: () -> Unit,
+) {
     if (show) {
         Dialog(onDismissRequest = { onDismiss() }) {
             Column(
@@ -339,6 +351,10 @@ fun MyDialogPasswordAuth(show: Boolean, emailProblem: Boolean, onDismiss: () -> 
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    CoroutineScope(Dispatchers.IO).launch {
+                        userPrefs.deleteUserData()
+                    }
+
                 }
             }
         }

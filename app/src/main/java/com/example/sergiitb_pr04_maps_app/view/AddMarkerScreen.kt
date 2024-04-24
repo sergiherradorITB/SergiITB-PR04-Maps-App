@@ -178,7 +178,10 @@ fun AddMarkerScreen(
                                 show = true
                             } else {
                                 val categoryToAdd = mapViewModel.getSelectedCategory()!!
-                                val latLng = mapViewModel.pillarEditingPosition()
+                                val latLng = if (mapViewModel.pillarEditingPosition() == null){ // Si la editing position es null es que no hemos dejado presionado
+                                    mapViewModel.getPosition() // Como no lo hemos dejado presionado pillamos la position en la que estemos
+                                } else mapViewModel.pillarEditingPosition() // Si no es nulo es que hemos presionado y nos quedamos con esa
+
                                 val photo = mapViewModel.getPhotoBitmap()
                                 val markerToAdd =
                                     photo?.let {

@@ -244,7 +244,8 @@ fun RegisterScreen(navController: NavController, mapViewModel: MapViewModel) {
 
         MyDialogPasswordAuth(
             showDialogAuth,
-            emailProblem
+            emailProblem,
+            userPrefs
         ) { mapViewModel.modificarShowDialogAuth(false) }
     }
 }

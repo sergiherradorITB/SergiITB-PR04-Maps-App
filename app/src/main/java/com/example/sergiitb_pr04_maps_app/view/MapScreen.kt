@@ -119,7 +119,7 @@ fun MapScreen(navController: NavController, mapViewModel: MapViewModel) {
                             cameraPositionState.position =
                                 CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
                             mapViewModel.changePosition(deviceLatLng)
-                            mapViewModel.modificarEditingPosition(deviceLatLng)
+                            // mapViewModel.modificarEditingPosition(deviceLatLng)
                         } else {
                             Log.e("Error", "Exception: %s", task.exception)
                         }
@@ -294,4 +294,5 @@ fun resetearParametros(mapViewModel: MapViewModel) {
     mapViewModel.modifyPhotoBitmap(null)
     mapViewModel.modifyPhotoTaken(false)
     mapViewModel.modifyShowGuapo(false)
+    mapViewModel.modificarEditingPosition(null)
 }
