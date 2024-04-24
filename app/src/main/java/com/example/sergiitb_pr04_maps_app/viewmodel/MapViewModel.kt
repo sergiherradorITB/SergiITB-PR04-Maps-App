@@ -675,7 +675,7 @@ class MapViewModel : ViewModel() {
     }
 
 
-    private val _imageUrlForUser = MutableLiveData<String>()
+    private val _imageUrlForUser = MutableLiveData<String?>()
     val imageUrlForUser = _imageUrlForUser
 
     private val _nombreUsuario = MutableLiveData<String>()
@@ -690,17 +690,16 @@ class MapViewModel : ViewModel() {
                     return@addSnapshotListener
                 }
 
-                var tempString =
-                    "https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1"
+                var tempString : String? = null
 
                 var tempStringNombre = "¿?"
                 if (value != null) {
                     for (dc: DocumentChange in value.documentChanges) {
                         if (dc.type == DocumentChange.Type.ADDED) {
                             tempString = dc.document.getString("image") ?: tempString
-                            tempStringNombre = dc.document.getString("name") ?: tempString
+                            tempStringNombre = (dc.document.getString("name") ?: tempString).toString()
                             Log.d("Success",("Un peruano encontrado"))
-                            Log.d("Success",(tempString))
+                            Log.d("Success",(tempString.toString()))
                         }
                     }
                 }
@@ -711,7 +710,10 @@ class MapViewModel : ViewModel() {
 
     fun updateUser() {
         getProfileImageUrlForUser()
-        val oldImageUrl = _imageUrlForUser.value // Guarda la URL de la imagen actual
+        var oldImageUrl:String? = null
+        if (_imageUrlForUser.value != null){
+            oldImageUrl = _imageUrlForUser.value // Guarda la URL de la imagen actual
+        }
 
         uploadImage(uriFoto.value!!) { downloadUrl ->
             // Realizar una consulta para encontrar el documento del usuario

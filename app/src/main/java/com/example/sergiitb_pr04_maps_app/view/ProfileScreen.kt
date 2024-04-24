@@ -23,18 +23,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.sergiitb_pr04_maps_app.MyDrawer
+import com.example.sergiitb_pr04_maps_app.R
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ProfileScreen(navController: NavController, mapViewModel: MapViewModel) {
-    val imageUrl: String by mapViewModel.imageUrlForUser.observeAsState("https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1")
+    val imageUrl: String? by mapViewModel.imageUrlForUser.observeAsState(null)
     val loggedUser: String by mapViewModel.loggedUser.observeAsState("")
     val userName = loggedUser
     val nombre: String by mapViewModel.nombreUsuario.observeAsState(initial = "")
@@ -99,14 +101,22 @@ fun ProfileScreen(navController: NavController, mapViewModel: MapViewModel) {
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
-                        } else {
-                            GlideImage(
-                                model = imageUrl,
-                                contentDescription = "Profile Image",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop,
-                            )
-                        }
+                        } else if (imageUrl != null) {
+                                println("YO NO ENTENDER" + mapViewModel.imageUrlForUser.value)
+                                GlideImage(
+                                    model = imageUrl,
+                                    contentDescription = "Profile Image",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = R.drawable.user),
+                                    contentDescription = "Profile Image",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            }
                     }
 
                     // Botón para editar la foto del marcador

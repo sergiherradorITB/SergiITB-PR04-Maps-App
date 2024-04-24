@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -117,7 +119,7 @@ fun MyDrawer(
 ) {
     val scope = rememberCoroutineScope()
     val state: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val imageUrl: String by mapViewModel.imageUrlForUser.observeAsState("")
+    val imageUrl: String? by mapViewModel.imageUrlForUser.observeAsState("")
     mapViewModel.getProfileImageUrlForUser()
 
     ModalNavigationDrawer(drawerState = state, gesturesEnabled = false, drawerContent = {
@@ -127,7 +129,11 @@ fun MyDrawer(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Menú Mapita", fontSize = 33.sp, modifier = Modifier.padding(start = 5.dp))
+                Text(
+                    text = "Menú Mapita",
+                    fontSize = 33.sp,
+                    modifier = Modifier.padding(start = 5.dp)
+                )
                 IconButton(
                     onClick = { scope.launch { state.close() } }
                 ) {
@@ -155,12 +161,22 @@ fun MyDrawer(
                         .size(200.dp)
                         .clip(CircleShape) // Clip con CircleShape
                 ) {
-                    GlideImage(
-                        model = imageUrl,
-                        contentDescription = "Profile Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
+                    if (imageUrl != null) {
+                        println("YO NO ENTENDER" + mapViewModel.imageUrlForUser.value)
+                        GlideImage(
+                            model = imageUrl,
+                            contentDescription = "Profile Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.user),
+                            contentDescription = "Profile Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.padding(7.dp))
 
@@ -257,149 +273,6 @@ fun MyTopAppBar(mapViewModel: MapViewModel, state: DrawerState, navController: N
                     navController.navigate(Routes.MapScreen.route)
                     mapViewModel.modificarTextoDropdownCat("Mostrar Todos")
                     mapViewModel.modificarTextoDropdown("Mostrar Todos")
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Map,
-                    contentDescription = "Back",
-                )
-            }
-        }
-    )
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
-@Composable
-fun MyDrawerTest(
-    navController: NavController,
-    mapViewModel: MapViewModel,
-) {
-    val scope = rememberCoroutineScope()
-    val state: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val imageUrl: String by mapViewModel.imageUrlForUser.observeAsState("")
-    mapViewModel.getProfileImageUrlForUser()
-
-    ModalNavigationDrawer(drawerState = state, gesturesEnabled = false, drawerContent = {
-        ModalDrawerSheet {
-            Text(text = "Mega Menú del Mapita", modifier = Modifier.padding(16.dp))
-            Divider()
-            IconButton(
-                onClick = {
-                    scope.launch {
-                        state.close()
-                    }
-                }
-            ) {
-                Icon(
-                    Icons.Default.Close, // Usar el icono de cierre adecuado
-                    contentDescription = "Close",
-                    tint = Color.Black
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                val context = LocalContext.current
-
-                screensFromDrawer.forEach { screen ->
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth(0.9f),
-                        shape = RectangleShape,
-                        onClick = {
-                            if (screen.route == "cerrar_sesion") {
-                                mapViewModel.signOut(context, navController)
-                            } else {
-                                navController.navigate(screen.route)
-                                scope.launch { state.close() }
-                            }
-                        }
-                    ) {
-                        Text(text = screen.title)
-                    }
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "User :  ${mapViewModel.loggedUser.value!!.split("@")[0]}",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 10.dp)
-                )
-                Box(
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .size(200.dp)
-                        .clip(CircleShape) // Clip con CircleShape
-                ) {
-                    GlideImage(
-                        model = imageUrl,
-                        contentDescription = "Profile Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
-                }
-            }
-        }
-    }) {
-        MyScaffoldTest(mapViewModel, state, navController)
-    }
-}
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-fun MyScaffoldTest(
-    mapViewModel: MapViewModel,
-    state: DrawerState,
-    navController: NavController,
-) {
-    Scaffold(
-        topBar = { MyTopAppBarTest(mapViewModel, state, navController) },
-    ) {
-        Box(Modifier.padding(it)) {
-
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MyTopAppBarTest(mapViewModel: MapViewModel, state: DrawerState, navController: NavController) {
-    val scope = rememberCoroutineScope()
-    TopAppBar(
-        title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "MAPITA ©",
-                    modifier = Modifier.weight(1f),
-                    color = Color.Black,
-                    fontSize = 23.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
-        },
-        navigationIcon = {
-            IconButton(onClick = {
-                scope.launch {
-                    state.open()
-                }
-            }) {
-                Icon(
-                    Icons.Default.Menu,
-                    contentDescription = "Menu",
-                    tint = Color.Black
-                )
-            }
-        },
-        actions = {
-            IconButton(
-                onClick = {
-                    navController.navigate(Routes.MapScreen.route)
                 },
             ) {
                 Icon(
