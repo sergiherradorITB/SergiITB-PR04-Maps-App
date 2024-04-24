@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -121,21 +122,25 @@ fun MyDrawer(
 
     ModalNavigationDrawer(drawerState = state, gesturesEnabled = false, drawerContent = {
         ModalDrawerSheet {
-            Text(text = "Mega Menú del Mapita", modifier = Modifier.padding(16.dp))
-            Divider()
-            IconButton(
-                onClick = {
-                    scope.launch {
-                        state.close()
-                    }
-                }
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(
-                    Icons.Default.Close, // Usar el icono de cierre adecuado
-                    contentDescription = "Close",
-                    tint = Color.Black
-                )
+                Text(text = "Menú Mapita", fontSize = 33.sp, modifier = Modifier.padding(start = 5.dp))
+                IconButton(
+                    onClick = { scope.launch { state.close() } }
+                ) {
+                    Icon(
+                        Icons.Default.Close, // Usar el icono de cierre adecuado
+                        contentDescription = "Close",
+                        tint = Color.Black
+                    )
+                }
             }
+
+            Divider()
+
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -143,6 +148,31 @@ fun MyDrawer(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val context = LocalContext.current
+
+                Box(
+                    modifier = Modifier
+                        .padding(top = 10.dp)
+                        .size(200.dp)
+                        .clip(CircleShape) // Clip con CircleShape
+                ) {
+                    GlideImage(
+                        model = imageUrl,
+                        contentDescription = "Profile Image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+                Spacer(modifier = Modifier.padding(7.dp))
+
+                if (mapViewModel.loggedUser.value != null) {
+                    Text(
+                        text = "User :  ${mapViewModel.nombreUsuario.value}",
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(bottom = 10.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.padding(10.dp))
 
                 screensFromDrawer.forEach { screen ->
                     Button(
@@ -161,23 +191,7 @@ fun MyDrawer(
                         Text(text = screen.title)
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                if (mapViewModel.loggedUser.value != null){
-                    Text(text = "User :  ${mapViewModel.nombreUsuario.value}", fontSize = 20.sp, modifier = Modifier.padding(bottom = 10.dp))
-                }
-                Box(
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .size(200.dp)
-                        .clip(CircleShape) // Clip con CircleShape
-                ) {
-                    GlideImage(
-                        model = imageUrl,
-                        contentDescription = "Profile Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
-                }
+
             }
         }
     }) {
@@ -304,7 +318,11 @@ fun MyDrawerTest(
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = "User :  ${mapViewModel.loggedUser.value!!.split("@")[0]}", fontSize = 20.sp, modifier = Modifier.padding(bottom = 10.dp))
+                Text(
+                    text = "User :  ${mapViewModel.loggedUser.value!!.split("@")[0]}",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
                 Box(
                     modifier = Modifier
                         .padding(top = 10.dp)

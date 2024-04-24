@@ -1,14 +1,18 @@
 package com.example.sergiitb_pr04_maps_app.view
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,91 +34,106 @@ import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ProfileScreen(navController: NavController, mapViewModel: MapViewModel) {
-    MyDrawer(navController = navController, mapViewModel = mapViewModel) {
-        val imageUrl: String by mapViewModel.imageUrlForUser.observeAsState("https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1")
-        val loggedUser: String by mapViewModel.loggedUser.observeAsState("")
-        val userName = loggedUser
-        val nombre:String by mapViewModel.nombreUsuario.observeAsState(initial = "")
-        mapViewModel.getProfileImageUrlForUser()
+    val imageUrl: String by mapViewModel.imageUrlForUser.observeAsState("https://firebasestorage.googleapis.com/v0/b/pueseso-5f478.appspot.com/o/images%2Fuser.webp?alt=media&token=965b2876-019f-433d-8ffe-56f6c216bab1")
+    val loggedUser: String by mapViewModel.loggedUser.observeAsState("")
+    val userName = loggedUser
+    val nombre: String by mapViewModel.nombreUsuario.observeAsState(initial = "")
+    mapViewModel.getProfileImageUrlForUser()
 
-        if (!mapViewModel.userLogged()){
-            mapViewModel.signOut(context = LocalContext.current, navController)
+    if (!mapViewModel.userLogged()) {
+        mapViewModel.signOut(context = LocalContext.current, navController)
+    }
+
+    val isLoading: Boolean by mapViewModel.isLoadingMarkers.observeAsState(initial = false)
+
+    if (!isLoading) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.width(64.dp),
+                color = MaterialTheme.colorScheme.secondary
+            )
         }
-
-        // Mostrar la pantalla de captura de foto si showTakePhotoScreen es verdadero
-        if (mapViewModel.showTakePhotoScreen) {
-            Box(
-                modifier = Modifier.fillMaxSize() // Esto hará que la pantalla de captura de foto ocupe toda la pantalla
-            ) {
-                TakePhotoScreen(
-                    mapViewModel = mapViewModel
-                ) { photo ->
-                    mapViewModel.modificarEditedPhoto(photo)
-                    mapViewModel.modificarShowTakePhotoScreen(false)
-                    mapViewModel.modificarEditedPhoto(photo)
-                }
-            }
-        } else {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Text(
-                    text = "Gmail: $userName",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 10.dp)
-                )
-                Text(
-                    text = "User: $nombre",
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 10.dp)
-                )
+    } else {
+    MyDrawer(navController = navController, mapViewModel = mapViewModel) {
+            // Mostrar la pantalla de captura de foto si showTakePhotoScreen es verdadero
+            if (mapViewModel.showTakePhotoScreen) {
                 Box(
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .size(200.dp)
-                        .clip(CircleShape) // Clip con CircleShape
+                    modifier = Modifier.fillMaxSize() // Esto hará que la pantalla de captura de foto ocupe toda la pantalla
                 ) {
-                    if (mapViewModel.editedPhoto != null) {
-                        Image(
-                            bitmap = mapViewModel.editedPhoto!!.asImageBitmap(),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        GlideImage(
-                            model = imageUrl,
-                            contentDescription = "Profile Image",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                        )
+                    TakePhotoScreen(
+                        mapViewModel = mapViewModel
+                    ) { photo ->
+                        mapViewModel.modificarEditedProfilePhoto(photo)
+                        mapViewModel.modificarShowTakePhotoScreen(false)
                     }
                 }
-
-                // Botón para editar la foto del marcador
-                Button(
-                    onClick = {
-                        mapViewModel.modificarShowTakePhotoScreen(true)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .padding(top = 20.dp)
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Text("Edit Photo")
-                }
+                    Text(
+                        text = "Gmail: $userName",
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(bottom = 10.dp)
+                    )
+                    Text(
+                        text = "User: $nombre",
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(bottom = 10.dp)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 10.dp)
+                            .size(200.dp)
+                            .clip(CircleShape) // Clip con CircleShape
+                    ) {
+                        if (mapViewModel.editedProfilePhoto != null) {
+                            Image(
+                                bitmap = mapViewModel.editedProfilePhoto!!.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            GlideImage(
+                                model = imageUrl,
+                                contentDescription = "Profile Image",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
+                    }
 
-                Button(
-                    onClick = {
-                        mapViewModel.updateUser()
-                        //mapViewModel.getProfileImageUrlForUser()
-                        //navController.navigate(Routes.ProfileScreen.route)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .padding(top = 5.dp)
-                ) {
-                    Text("Save Changes")
+                    // Botón para editar la foto del marcador
+                    Button(
+                        onClick = {
+                            mapViewModel.modificarShowTakePhotoScreen(true)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .padding(top = 20.dp)
+                    ) {
+                        Text("Edit Photo")
+                    }
+
+                    Button(
+                        onClick = {
+                            mapViewModel.updateUser()
+                            mapViewModel.modificarEditedProfilePhoto(null)
+                            //mapViewModel.getProfileImageUrlForUser()
+                            //navController.navigate(Routes.ProfileScreen.route)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .padding(top = 5.dp)
+                    ) {
+                        Text("Save Changes")
+                    }
                 }
             }
         }

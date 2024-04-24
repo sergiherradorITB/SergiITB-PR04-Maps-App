@@ -46,6 +46,9 @@ class MapViewModel : ViewModel() {
     var editedPhoto by mutableStateOf<Bitmap?>(null)
         private set
 
+    var editedProfilePhoto by mutableStateOf<Bitmap?>(null)
+        private set
+
     var showTakePhotoScreen by mutableStateOf(false)
         private set
 
@@ -60,6 +63,9 @@ class MapViewModel : ViewModel() {
         editedSnippet = snippet
     }
 
+    fun modificarEditedProfilePhoto(photo: Bitmap?) {
+        editedProfilePhoto = photo
+    }
     fun modificarEditedPhoto(photo: Bitmap?) {
         editedPhoto = photo
     }
@@ -386,7 +392,6 @@ class MapViewModel : ViewModel() {
     }
 
     fun pillarTodosMarkers() {
-        //modifyLoadingMarkers(false)
         repository.getMarkers()
             .whereEqualTo("owner", _loggedUser.value)
             .addSnapshotListener { value, error ->
@@ -411,7 +416,6 @@ class MapViewModel : ViewModel() {
 
                 }
                 _markers.value = tempList
-                // modifyLoadingMarkers(true)
             }
     }
 
@@ -726,15 +730,18 @@ class MapViewModel : ViewModel() {
                                 if (oldImageUrl != null) {
                                     deleteProfileImage(oldImageUrl)
                                 }
+                                modifyLoadingMarkers(true)
                             }
                             .addOnFailureListener { e ->
                                 Log.d("Error",("Error al actualizar el usuario en la base de datos: ${e.message}"))
                             }
+                        modifyLoadingMarkers(true)
                     }
                     getProfileImageUrlForUser()
                 }
                 .addOnFailureListener { exception ->
                     Log.d("Error",("Error al consultar la base de datos: ${exception.message}"))
+                    modifyLoadingMarkers(true)
                 }
         }
     }
