@@ -24,7 +24,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +44,6 @@ import com.example.sergiitb_pr04_maps_app.model.Categoria
 import com.example.sergiitb_pr04_maps_app.model.MarkerSergi
 import com.example.sergiitb_pr04_maps_app.viewmodel.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -62,18 +60,13 @@ fun AddMarkerScreen(
 
     val showGuapo: Boolean by mapViewModel.showGuapo.observeAsState(false)
 
-    val permissionState =
-        rememberPermissionState(permission = Manifest.permission.CAMERA)
+    val permissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
     Column(Modifier.fillMaxHeight(1f)) {
 
         if (!mapViewModel.userLogged()) {
             mapViewModel.signOut(context = LocalContext.current, navController)
         }
 
-        LaunchedEffect(Unit) {
-            permissionState.launchPermissionRequest()
-        }
-        if (permissionState.status.isGranted) {
             // Mostrar la vista de captura de foto si no se ha tomado ninguna foto
             if (showGuapo) {
                 if (estoyListScreen) {
@@ -203,7 +196,6 @@ fun AddMarkerScreen(
                                 onCloseBottomSheet()
                                 resetearParametros(mapViewModel)
                                 mapViewModel.modificarTextoDropdownCat("Seleccionar Categoría")
-
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -213,9 +205,6 @@ fun AddMarkerScreen(
                     MyDialog(show) { show = false }
                 }
             }
-        } else {
-            PermissionDeclinedScreen()
-        }
     }
 }
 
