@@ -203,7 +203,7 @@ class MapViewModel : ViewModel() {
         return position
     }
 
-    private var _editingPosition = MutableLiveData<LatLng>()
+    private var _editingPosition = MutableLiveData<LatLng?>()
     val editingPosition = _editingPosition
 
     fun modificarEditingPosition(newValue: LatLng?){
